@@ -1,0 +1,56 @@
+.maze {
+  display: grid;
+  padding: 4px;
+  border: 2px solid #2c2c36;
+  border-radius: 8px;
+  line-height: 0;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.empty {
+  background: transparent;
+}
+
+.wall {
+  background: var(--wall-color);
+  border-radius: 3px;
+}
+
+.door {
+  background: transparent;
+  position: relative;
+}
+
+.door::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--door-color);
+}
+
+.pellet,
+.power {
+  background: transparent;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--pellet-color);
+}
+
+.powerDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--power-color);
+}
