@@ -1,0 +1,24 @@
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* COUPLING: these must match the Maze's padding(4px) + border(2px) so the
+   * overlay's tile (0,0) aligns with the maze's tile (0,0). If the Maze padding
+   * or border changes, update these (and .pacman's top/left below) too. */
+  padding: 4px;
+  border: 2px solid transparent;
+  pointer-events: none;
+}
+
+.pacman {
+  position: absolute;
+  /* COUPLING: top/left must match the Maze's padding(4px) + border(2px) =
+   * the offset to tile (0,0). Keep in sync with .layer above and the Maze
+   * padding/border so a maze padding change won't silently misalign Pac-Man. */
+  top: 4px;
+  left: 4px;
+  border-radius: 50%;
+  background: var(--pacman-color);
+  /* Wedge "mouth" opening to the right (rotated per direction by transform). */
+  clip-path: polygon(100% 25%, 50% 50%, 100% 75%, 100% 100%, 0 100%, 0 0, 100% 0);
+}
