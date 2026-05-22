@@ -6,13 +6,21 @@ import type { IconTheme } from '../logic/types';
 import styles from './Maze.module.css';
 
 type Props = {
+  /** Live (uneaten) pellet keys from game state — eaten cells disappear. */
+  pellets: Set<string>;
+  /** Live (uneaten) power-pellet keys from game state. */
+  powerPellets: Set<string>;
   theme?: IconTheme;
 };
 
 type CellKind = 'wall' | 'pellet' | 'power' | 'door' | 'empty';
 
-export function Maze({ theme = 'normal' }: Props) {
-  const { walls, pellets, powerPellets, doorTiles, cols, rows } = PARSED_MAZE;
+// walls, doorTiles, cols, and rows come from the module-level PARSED_MAZE
+// constant and never change — hoist them so the useMemo dep array only
+// contains the live pellet sets that actually drive re-renders.
+const { walls, doorTiles, cols, rows } = PARSED_MAZE;
+
+export function Maze({ pellets, powerPellets, theme = 'normal' }: Props) {
   const spec = THEMES[theme];
 
   const cells = useMemo(() => {
@@ -31,7 +39,7 @@ export function Maze({ theme = 'normal' }: Props) {
       }
     }
     return out;
-  }, [walls, pellets, powerPellets, doorTiles, cols, rows]);
+  }, [pellets, powerPellets]);
 
   return (
     <div

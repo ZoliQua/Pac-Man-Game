@@ -1,7 +1,9 @@
 import { DEFAULT_THEME, START_LIVES } from './constants';
+import { key } from './grid';
 import { PARSED_MAZE } from './maze';
 import { nextPacman } from './pacman';
-import type { GameState, Ghost } from './types';
+import { pelletPoints, powerPelletPoints } from './scoring';
+import type { GameState, GameStatus, Ghost } from './types';
 
 /**
  * Build the four ghosts as DATA only. They do NOT move this phase (Phase 4).
@@ -72,9 +74,12 @@ export function createInitialState(
 }
 
 /**
- * The single pure tick. THIS PHASE MOVES ONLY PAC-MAN — no ghost movement, no
- * pellet eating, no scoring (those arrive in later phases). When not running,
- * the state is returned unchanged.
+ * The single pure tick. Moves Pac-Man and handles pellet/power-pellet eating
+ * with scoring. When not running the state is returned unchanged.
+ *
+ * Immutability contract: the incoming `state` object and its `pellets` /
+ * `powerPellets` Sets are NEVER mutated. New Set copies are created only when
+ * something was eaten.
  */
 export function advanceGame(state: GameState): GameState {
   if (state.status !== 'running') {
@@ -84,5 +89,23 @@ export function advanceGame(state: GameState): GameState {
   const { walls, cols, rows, tunnelRow } = PARSED_MAZE;
   const pacman = nextPacman(state.pacman, walls, cols, rows, tunnelRow);
 
-  return { ...state, pacman };
+  // --- Pellet / power-pellet consumption ---
+  const tileKey = key(pacman.pos);
+  let { pellets, powerPellets, score } = state;
+
+  if (pellets.has(tileKey)) {
+    pellets = new Set(pellets);
+    pellets.delete(tileKey);
+    score = score + pelletPoints();
+  } else if (powerPellets.has(tileKey)) {
+    powerPellets = new Set(powerPellets);
+    powerPellets.delete(tileKey);
+    score = score + powerPelletPoints();
+  }
+
+  // --- Level-clear check ---
+  const status: GameStatus =
+    pellets.size === 0 && powerPellets.size === 0 ? 'levelClear' : state.status;
+
+  return { ...state, pacman, pellets, powerPellets, score, status };
 }
