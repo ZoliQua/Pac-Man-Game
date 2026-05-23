@@ -22,3 +22,14 @@
   /* Wedge "mouth" opening to the right (rotated per direction by transform). */
   clip-path: polygon(100% 25%, 50% 50%, 100% 75%, 100% 100%, 0 100%, 0 0, 100% 0);
 }
+
+.ghost {
+  position: absolute;
+  /* COUPLING: top/left must match the Maze's padding(4px) + border(2px), like
+   * .pacman above, so ghost tile (0,0) aligns with the maze. */
+  top: 4px;
+  left: 4px;
+  background: var(--ghost-color);
+  /* Rounded "hood" top, flat body bottom — a simple ghost silhouette. */
+  border-radius: 45% 45% 12% 12% / 60% 60% 12% 12%;
+}

@@ -22,7 +22,9 @@ export type Ghost = {
   dir: Direction;
   mode: GhostMode;
   inHouse: boolean; // still parked in the ghost house
-  dotCounter: number; // pellet gate for leaving the house
+  dotCounter: number; // Currently unused in Phase 4 — the house-exit gate uses the global
+  // pellets-eaten count vs HOUSE_DOT_LIMITS (see ghosts.ts). Reserved for
+  // Phase 5 per-ghost house re-entry after being eaten.
 };
 
 export type GameState = {

@@ -1,4 +1,4 @@
-import type { IconTheme } from './types';
+import type { GhostName, IconTheme, Vec } from './types';
 
 /** Milliseconds per game tick (one tile step per entity). */
 export const TICK_MS = 150;
@@ -74,3 +74,63 @@ export const THEMES: Record<IconTheme, ThemeSpec> = {
 };
 
 export const DEFAULT_THEME: IconTheme = 'normal';
+
+/** Seconds → ticks (rounded). 1 tick = TICK_MS. */
+const secs = (s: number): number => Math.round((s * 1000) / TICK_MS);
+
+/**
+ * One scatter/chase phase: a global ghost mode held for `ticks` ticks. The
+ * scheduler walks this table via `phaseIndex`/`phaseTimer`; the last phase uses
+ * a very large tick count to mean "chase indefinitely". Classic-style schedule
+ * (7s scatter, 20s chase, 7s, 20s, 5s, 20s, 5s, then chase forever).
+ */
+export type ScatterChasePhase = { mode: 'scatter' | 'chase'; ticks: number };
+
+export const SCATTER_CHASE: readonly ScatterChasePhase[] = [
+  { mode: 'scatter', ticks: secs(7) },
+  { mode: 'chase', ticks: secs(20) },
+  { mode: 'scatter', ticks: secs(7) },
+  { mode: 'chase', ticks: secs(20) },
+  { mode: 'scatter', ticks: secs(5) },
+  { mode: 'chase', ticks: secs(20) },
+  { mode: 'scatter', ticks: secs(5) },
+  { mode: 'chase', ticks: 1_000_000_000 },
+] as const;
+
+/**
+ * Scatter-mode home corners, one per ghost. Classic assignment: Blinky
+ * top-right, Pinky top-left, Inky bottom-right, Clyde bottom-left. Coordinates
+ * sit just outside the play area in each corner of the 28x31 maze so ghosts
+ * loop tightly around that corner during scatter.
+ */
+export const SCATTER_CORNERS: Record<GhostName, Vec> = {
+  blinky: { x: 25, y: -2 }, // top-right
+  pinky: { x: 2, y: -2 }, // top-left
+  inky: { x: 27, y: 31 }, // bottom-right
+  clyde: { x: 0, y: 31 }, // bottom-left
+};
+
+/**
+ * Pellets-eaten thresholds before each ghost may leave the house. Blinky starts
+ * outside (0). Pinky leaves immediately (0); Inky after 30; Clyde after 60.
+ */
+export const HOUSE_DOT_LIMITS: Record<GhostName, number> = {
+  blinky: 0,
+  pinky: 0,
+  inky: 30,
+  clyde: 60,
+};
+
+/**
+ * Maze-layout-derived ghost-house exit constants. These are coupled to the
+ * physical tile positions in MAZE (maze.ts) and must be updated if the maze
+ * layout changes.
+ *
+ * HOUSE_DOOR_ROW: the row of the ghost-house door tiles ('-'). Door tiles sit
+ *   at columns 13–14, row 12.
+ * HOUSE_EXIT: the tile just above the door — the aim point for a ghost
+ *   leaving the house. Blinky spawns here (row 11, col 13) and it is the
+ *   first open-corridor tile a ghost reaches after rising through the door.
+ */
+export const HOUSE_DOOR_ROW = 12;
+export const HOUSE_EXIT: Vec = { x: 13, y: 11 };

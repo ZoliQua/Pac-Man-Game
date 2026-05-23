@@ -39,9 +39,9 @@ export const MAZE: string[] = [
   '#......##....##....##......#',
   '######.##### ## #####.######',
   '######.##### ## #####.######',
-  '######.##    b     ##.######',
-  '######.## ###--### ##.######',
-  '######.## # p n c# ##.######',
+  '######.##    b     ##.######', // row 11 — Blinky spawn / HOUSE_EXIT (x=13,y=11)
+  '######.## ###--### ##.######', // row 12 — ghost-house door ('-') / HOUSE_DOOR_ROW=12
+  '######.## # p n c# ##.######', // row 13 — ghost-house interior spawns
   '          #      #          ',
   '######.## #      # ##.######',
   '######.## ######## ##.######',
@@ -280,3 +280,10 @@ export function validateMaze(parsed: ParsedMaze): void {
 // Validate once at module load so a malformed maze fails fast.
 export const PARSED_MAZE: ParsedMaze = parseMaze();
 validateMaze(PARSED_MAZE);
+
+/**
+ * Total edible dots at level start (regular pellets + power pellets). Used to
+ * derive "pellets eaten" from the live state for ghost house-exit gates.
+ */
+export const INITIAL_PELLET_TOTAL: number =
+  PARSED_MAZE.pellets.size + PARSED_MAZE.powerPellets.size;

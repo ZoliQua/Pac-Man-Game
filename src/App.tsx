@@ -93,7 +93,11 @@ export default function App() {
           powerPellets={state.powerPellets}
           theme={state.theme}
         />
-        <Entities pacman={state.pacman} theme={state.theme} />
+        <Entities
+          pacman={state.pacman}
+          ghosts={state.ghosts}
+          theme={state.theme}
+        />
       </div>
       <div className={styles.controls}>
         {state.status === 'idle' ? (
