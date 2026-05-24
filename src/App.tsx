@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Maze } from './components/Maze';
 import { Entities } from './components/Entities';
 import { ScoreBoard } from './components/ScoreBoard';
+import { GameControls } from './components/GameControls';
+import { Overlay } from './components/Overlay';
 import { TICK_MS } from './logic/constants';
 import { advanceGame, createInitialState } from './logic/game';
 import { useGameLoop } from './hooks/useGameLoop';
@@ -20,7 +22,14 @@ export default function App() {
     setState((prev) => advanceGame(prev));
   }, []);
 
-  useGameLoop(state.status === 'running', TICK_MS, tick);
+  // The loop must also tick during the brief `dying` / `levelClear` transition
+  // states so their `transitionTimer` resolves. It stays OFF in idle / paused /
+  // gameOver.
+  const loopActive =
+    state.status === 'running' ||
+    state.status === 'dying' ||
+    state.status === 'levelClear';
+  useGameLoop(loopActive, TICK_MS, tick);
 
   // Keep scoreRef current so the transition effect can read the final score
   // without adding state.score to the status-change effect's deps.
@@ -60,6 +69,8 @@ export default function App() {
     );
   }, []);
 
+  // Pause only toggles between running and paused — never during the `dying` /
+  // `levelClear` transition states (where freezing would wedge the timer).
   const handlePause = useCallback(() => {
     setState((prev) => {
       if (prev.status === 'running') return { ...prev, status: 'paused' };
@@ -84,6 +95,7 @@ export default function App() {
       <ScoreBoard
         score={state.score}
         highScore={highScore}
+        lives={state.lives}
         level={state.level}
         status={state.status}
       />
@@ -98,22 +110,21 @@ export default function App() {
           ghosts={state.ghosts}
           theme={state.theme}
         />
+        <Overlay
+          status={state.status}
+          score={state.score}
+          level={state.level}
+          onStart={handleStart}
+          onResume={handlePause}
+          onRestart={handleRestart}
+        />
       </div>
-      <div className={styles.controls}>
-        {state.status === 'idle' ? (
-          <button type="button" onClick={handleStart}>
-            Start
-          </button>
-        ) : null}
-        {state.status === 'running' || state.status === 'paused' ? (
-          <button type="button" onClick={handlePause}>
-            {state.status === 'paused' ? 'Resume' : 'Pause'}
-          </button>
-        ) : null}
-        <button type="button" onClick={handleRestart}>
-          Restart
-        </button>
-      </div>
+      <GameControls
+        status={state.status}
+        onStart={handleStart}
+        onTogglePause={handlePause}
+        onRestart={handleRestart}
+      />
     </main>
   );
 }

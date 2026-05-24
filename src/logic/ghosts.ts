@@ -8,7 +8,7 @@ import {
 import { neighbour } from './grid';
 import { INITIAL_PELLET_TOTAL, PARSED_MAZE } from './maze';
 import { canMove, stepWithWrap } from './movement';
-import type { Direction, Ghost, GameState, Vec } from './types';
+import type { Direction, Ghost, GhostName, GameState, Vec } from './types';
 
 /**
  * Phase 4 ghost AI. Pure (no React). Ghosts decide direction only at tile
@@ -68,6 +68,18 @@ function ahead(pos: Vec, dir: Direction, n: number): Vec {
  * Pac-Man instead of fleeing/returning to the house.
  */
 export function targetTile(ghost: Ghost, state: GameState): Vec {
+  // Per-ghost mode is checked BEFORE the global scatter/chase mode.
+  // - eaten: head back to the house door so the eyes return home.
+  // - frightened: movement is pseudo-random (see advanceGhost); the returned
+  //   target is unused, but we return the ghost's own position so any caller
+  //   that does consult it gets a harmless no-op target.
+  if (ghost.mode === 'eaten') {
+    return HOUSE_EXIT;
+  }
+  if (ghost.mode === 'frightened') {
+    return ghost.pos;
+  }
+
   if (globalMode(state.phaseIndex) === 'scatter') {
     return SCATTER_CORNERS[ghost.name];
   }
@@ -144,6 +156,56 @@ export function chooseDir(
   return 'NONE';
 }
 
+/** Stable index per ghost name, used as a hash ingredient. */
+const GHOST_INDEX: Record<GhostName, number> = {
+  blinky: 0,
+  pinky: 1,
+  inky: 2,
+  clyde: 3,
+};
+
+/**
+ * Pick a frightened ghost's next direction PSEUDO-RANDOMLY among the legal
+ * non-reverse directions, using a DETERMINISTIC state-derived hash (no
+ * `Math.random`, so a given state always yields the same choice and ticks are
+ * reproducible).
+ *
+ * Hash inputs: the ghost's name-index, its tile x/y, and the remaining
+ * `frightenedTimer`. They are combined with a small mixing function (xorshift-
+ * style multiply/shift) and reduced modulo the candidate count. The candidate
+ * list is built in the same up>left>down>right order as `chooseDir`, with the
+ * reverse direction excluded (frightened ghosts still never 180° on their own).
+ * If only the reverse remains (dead end), it is allowed.
+ */
+export function frightenedDir(ghost: Ghost, frightenedTimer: number): Direction {
+  const { walls, cols, rows, tunnelRow } = PARSED_MAZE;
+  const banned = reverse(ghost.dir);
+
+  const legal: Direction[] = [];
+  for (const dir of CANDIDATE_DIRS) {
+    if (dir === banned) continue;
+    if (canMove(ghost.pos, dir, walls, cols, rows, tunnelRow)) legal.push(dir);
+  }
+
+  if (legal.length === 0) {
+    // Dead end: only the reverse remains legal — allow it.
+    const rev = reverse(ghost.dir);
+    if (rev !== 'NONE' && canMove(ghost.pos, rev, walls, cols, rows, tunnelRow)) {
+      return rev;
+    }
+    return 'NONE';
+  }
+
+  // Deterministic hash → index into the legal list.
+  let h = (GHOST_INDEX[ghost.name] + 1) * 374761393;
+  h = (h ^ (ghost.pos.x * 668265263)) >>> 0;
+  h = (h ^ (ghost.pos.y * 2246822519)) >>> 0;
+  h = (h ^ (frightenedTimer * 3266489917)) >>> 0;
+  h = (h ^ (h >>> 15)) >>> 0;
+  const idx = h % legal.length;
+  return legal[idx];
+}
+
 /**
  * "Pellets eaten so far" derived from the live state (immutable read).
  *
@@ -159,15 +221,65 @@ export function pelletsEaten(state: GameState): number {
 /**
  * Advance one ghost by at most one tile. Pure; returns a NEW Ghost.
  *
+ * Mode-specific behaviour (checked before the normal scatter/chase path):
+ *
+ * - frightened: moves at HALF speed. We gate movement on the parity of
+ *   `state.frightenedTimer`: the ghost only steps when the timer is EVEN, so it
+ *   visibly moves every other tick. (Parity of the timer is used rather than a
+ *   per-ghost counter so the slow-down stays purely state-derived and resets
+ *   cleanly when frightened ends.) When it does move, direction is chosen
+ *   pseudo-randomly and deterministically via `frightenedDir`. Tunnel wrap
+ *   applies. Never reverses on its own (only the power-pellet reversal in
+ *   game.ts flips it).
+ *
+ * - eaten (eyes): moves at FULL speed back toward the house via `chooseDir`
+ *   targeting HOUSE_EXIT, with reverses allowed so the eyes can backtrack and
+ *   re-enter the door without wedging. On reaching HOUSE_EXIT the ghost is
+ *   REVIVED: it is re-seated at its in-house spawn and re-flagged `inHouse`
+ *   with the current global mode, so the existing house-exit logic walks it
+ *   back out on subsequent ticks. (Reviving via the house rather than directly
+ *   above the door reuses the proven exit path and avoids re-integration bugs.)
+ *
+ * House handling (only for non-eaten ghosts; eaten ghosts ignore the gate so
+ * eyes are never parked):
  * - In-house ghost whose dot gate is NOT met: stays put.
  * - In-house ghost whose gate IS met: heads for the exit tile above the door
- *   (reverses allowed so it can turn around inside the chamber). Once it has
- *   risen above the door row it is considered out (`inHouse = false`).
+ *   (reverses allowed). Once risen above the door row it is considered out.
  * - Out-of-house ghost: targets `targetTile`, picks a direction with `chooseDir`
  *   (no 180°), and steps one tile (tunnel wrap applies).
  */
 export function advanceGhost(ghost: Ghost, state: GameState): Ghost {
   const { tunnelRow, cols } = PARSED_MAZE;
+
+  // --- eaten (eyes) returning home ---
+  if (ghost.mode === 'eaten') {
+    // Reached the door exit tile → revive into the chamber and re-exit.
+    if (ghost.pos.x === HOUSE_EXIT.x && ghost.pos.y === HOUSE_EXIT.y) {
+      const spawn = PARSED_MAZE.ghostSpawns[ghost.name];
+      return {
+        ...ghost,
+        pos: spawn,
+        dir: 'NONE',
+        mode: globalMode(state.phaseIndex),
+        inHouse: true,
+      };
+    }
+    // Full speed toward the house; reverses allowed to avoid wedging.
+    const dir = chooseDir(ghost, HOUSE_EXIT, true);
+    const pos = stepWithWrap(ghost.pos, dir, tunnelRow, cols);
+    return { ...ghost, pos, dir };
+  }
+
+  // --- frightened: half speed + pseudo-random turns ---
+  if (ghost.mode === 'frightened' && !ghost.inHouse) {
+    // Half speed: only move on even-timer ticks.
+    if (state.frightenedTimer % 2 !== 0) {
+      return ghost;
+    }
+    const dir = frightenedDir(ghost, state.frightenedTimer);
+    const pos = stepWithWrap(ghost.pos, dir, tunnelRow, cols);
+    return { ...ghost, pos, dir };
+  }
 
   if (ghost.inHouse) {
     const gateMet = pelletsEaten(state) >= HOUSE_DOT_LIMITS[ghost.name];

@@ -1,0 +1,41 @@
+.controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.primary,
+.secondary {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.primary {
+  background: #facc15;
+  color: #1a1300;
+}
+
+.primary:hover {
+  background: #fde047;
+}
+
+.primary:active {
+  transform: translateY(1px);
+}
+
+.secondary {
+  background: transparent;
+  color: #e5e7eb;
+  border-color: #2c2c36;
+}
+
+.secondary:hover {
+  background: #1e1e24;
+}

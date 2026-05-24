@@ -1,0 +1,49 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 8, 12, 0.74);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 32px;
+  background: #1e1e24;
+  border: 2px solid #2c2c36;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 240px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffff00;
+}
+
+.panel p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.panel button {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  background: #facc15;
+  color: #1a1300;
+  cursor: pointer;
+}
+
+.panel button:hover {
+  background: #fde047;
+}

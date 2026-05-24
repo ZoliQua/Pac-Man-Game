@@ -134,3 +134,36 @@ export const HOUSE_DOT_LIMITS: Record<GhostName, number> = {
  */
 export const HOUSE_DOOR_ROW = 12;
 export const HOUSE_EXIT: Vec = { x: 13, y: 11 };
+
+/**
+ * Frightened-mode duration in ticks for a given level.
+ *
+ * Classic Pac-Man shortens the frightened window as levels progress. We keep it
+ * simple: base ~6 seconds (level 1) and subtract ~0.5s worth of ticks per level
+ * above 1, with a floor of ~1 second so it never collapses to nothing.
+ *
+ *   level 1 → 6.0s, level 2 → 5.5s, level 3 → 5.0s, ... floor at 1.0s.
+ *
+ * Returned value is in TICKS (each tick = TICK_MS).
+ */
+export function frightenedTicks(level: number): number {
+  const base = Math.round(6000 / TICK_MS); // ~6 seconds
+  const perLevel = Math.round(500 / TICK_MS); // ~0.5 second shorter each level
+  const floor = Math.round(1000 / TICK_MS); // ~1 second minimum
+  const ticks = base - perLevel * Math.max(0, level - 1);
+  return Math.max(floor, ticks);
+}
+
+/**
+ * When `frightenedTimer` drops to this many ticks (or fewer), the UI should
+ * flash the frightened ghosts to warn that the window is about to close
+ * (consumed by the renderer in Phase 6; the remaining timer is exposed on
+ * `GameState.frightenedTimer`). Pure constant — no behavioural effect here.
+ */
+export const FRIGHTENED_FLASH_TICKS = Math.round(2000 / TICK_MS); // ~2 seconds
+
+/** Ticks the board freezes on a death before respawn / game over (~1s). */
+export const DYING_PAUSE_TICKS = Math.round(1000 / TICK_MS);
+
+/** Ticks the board freezes on a cleared level before the next one (~1s). */
+export const LEVELCLEAR_PAUSE_TICKS = Math.round(1000 / TICK_MS);

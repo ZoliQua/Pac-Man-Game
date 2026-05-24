@@ -17,16 +17,3 @@
 .boardWrap {
   position: relative;
 }
-
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status {
-  color: #9fb3c8;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}

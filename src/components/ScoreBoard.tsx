@@ -4,6 +4,7 @@ import styles from './ScoreBoard.module.css';
 type Props = {
   score: number;
   highScore: number;
+  lives: number;
   level: number;
   status: GameStatus;
 };
@@ -17,7 +18,13 @@ const STATUS_LABEL: Record<GameStatus, string> = {
   gameOver: 'Game over',
 };
 
-export function ScoreBoard({ score, highScore, level, status }: Props) {
+export function ScoreBoard({
+  score,
+  highScore,
+  lives,
+  level,
+  status,
+}: Props) {
   const isNewHigh = score > 0 && score > highScore;
 
   return (
@@ -31,6 +38,10 @@ export function ScoreBoard({ score, highScore, level, status }: Props) {
         <span className={`${styles.value} ${isNewHigh ? styles.best : ''}`}>
           {highScore}
         </span>
+      </div>
+      <div className={styles.metric}>
+        <span className={styles.label}>Lives</span>
+        <span className={styles.value}>{lives}</span>
       </div>
       <div className={styles.metric}>
         <span className={styles.label}>Level</span>
