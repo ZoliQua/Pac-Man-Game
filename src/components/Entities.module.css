@@ -19,8 +19,21 @@
   left: 4px;
   border-radius: 50%;
   background: var(--pacman-color);
-  /* Wedge "mouth" opening to the right (rotated per direction by transform). */
-  clip-path: polygon(100% 25%, 50% 50%, 100% 75%, 100% 100%, 0 100%, 0 0, 100% 0);
+  opacity: var(--entity-opacity, 1);
+  /* Mouth wedge animates open/closed via clip-path keyframes; the parent
+   * transform (set inline) rotates it to face the travel direction. */
+  animation: chomp 0.32s steps(1, end) infinite;
+}
+
+@keyframes chomp {
+  0%,
+  49% {
+    clip-path: polygon(100% 25%, 50% 50%, 100% 75%, 100% 100%, 0 100%, 0 0, 100% 0);
+  }
+  50%,
+  100% {
+    clip-path: polygon(100% 45%, 50% 50%, 100% 55%, 100% 100%, 0 100%, 0 0, 100% 0);
+  }
 }
 
 .ghost {
@@ -30,6 +43,70 @@
   top: 4px;
   left: 4px;
   background: var(--ghost-color);
+  opacity: var(--entity-opacity, 1);
   /* Rounded "hood" top, flat body bottom — a simple ghost silhouette. */
   border-radius: 45% 45% 12% 12% / 60% 60% 12% 12%;
+  transition: background 80ms linear;
+}
+
+/* Eyes: two small white ovals with a coloured pupil that shifts toward the
+ * ghost's travel direction (inline transform on .pupil). */
+.eyes {
+  position: absolute;
+  top: 26%;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 14%;
+}
+
+.eye {
+  position: relative;
+  width: 32%;
+  height: 38%;
+  background: var(--eye-color);
+  border-radius: 50%;
+}
+
+.pupil {
+  position: absolute;
+  top: 28%;
+  left: 28%;
+  width: 44%;
+  height: 44%;
+  background: var(--pupil-color);
+  border-radius: 50%;
+}
+
+/* Frightened: no eyes, body uses the themed frightened colour (set inline).
+ * The flash colour is swapped inline in the final FRIGHTENED_FLASH_TICKS. */
+.frightened {
+  background: var(--ghost-color);
+}
+
+/* Eaten: only the eyes remain (transparent body), drifting home. */
+.eaten {
+  background: transparent;
+}
+
+.eaten .eyes {
+  top: 32%;
+}
+
+/* Fog theme: soft glow + slight blur make the entities read as drifting wisps,
+ * without changing their tile positions or sizes. Cosmetic only.
+ *
+ * IMPORTANT — CSS Modules descendant-selector coupling:
+ * Both `.theme-fog` and `.pacman` / `.ghost` must stay in THIS file. Vite
+ * hashes them together, preserving the descendant relationship at build time.
+ * Splitting either class into a different module file would silently break
+ * theme styling — the scoped class names would no longer match. */
+.theme-fog .pacman {
+  filter: drop-shadow(0 0 4px rgba(223, 230, 210, 0.55));
+}
+
+.theme-fog .ghost {
+  filter: drop-shadow(0 0 5px rgba(120, 160, 200, 0.5));
+  border-radius: 48% 48% 16% 16% / 64% 64% 16% 16%;
 }

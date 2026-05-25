@@ -136,11 +136,21 @@ export function advanceGame(state: GameState): GameState {
     return state;
   }
 
-  const { walls, cols, rows, tunnelRow } = PARSED_MAZE;
+  const { walls, cols, rows, tunnelRow, doorTiles } = PARSED_MAZE;
 
   // --- 1. Move Pac-Man ---
+  // `doorTiles` are passed as Pac-only blocked tiles: they are not walls (ghosts
+  // must pass them for house exit / eaten return), but Pac-Man must never enter
+  // the ghost house through the door.
   const pacPrev = state.pacman.pos;
-  const pacman = nextPacman(state.pacman, walls, cols, rows, tunnelRow);
+  const pacman = nextPacman(
+    state.pacman,
+    walls,
+    cols,
+    rows,
+    tunnelRow,
+    doorTiles,
+  );
 
   // --- Pellet / power-pellet consumption ---
   const tileKey = key(pacman.pos);
@@ -275,15 +285,21 @@ export function advanceGame(state: GameState): GameState {
     }
   }
 
-  // --- 6. Resolve status. `dying` (collision) takes precedence over levelClear. ---
+  // --- 6. Resolve status. `levelClear` takes precedence over `dying`. ---
+  // If both pellet sets are empty at the end of this tick the level is cleared,
+  // even if a fatal collision also happened this tick: eating the last pellet
+  // clears the level and the player does NOT die (this avoids the phantom-clear
+  // bug where dying-on-the-last-pellet respawns into an empty maze and the next
+  // running tick flips to levelClear, costing a life AND clearing the level).
+  // A fatal collision only resolves to `dying` when pellets still remain.
   let status: GameStatus = state.status;
   let transitionTimer = state.transitionTimer;
-  if (collidedFatal) {
-    status = 'dying';
-    transitionTimer = DYING_PAUSE_TICKS;
-  } else if (pellets.size === 0 && powerPellets.size === 0) {
+  if (pellets.size === 0 && powerPellets.size === 0) {
     status = 'levelClear';
     transitionTimer = LEVELCLEAR_PAUSE_TICKS;
+  } else if (collidedFatal) {
+    status = 'dying';
+    transitionTimer = DYING_PAUSE_TICKS;
   }
 
   return {

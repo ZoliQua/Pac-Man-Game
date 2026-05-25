@@ -3,17 +3,20 @@ import { Maze } from './components/Maze';
 import { Entities } from './components/Entities';
 import { ScoreBoard } from './components/ScoreBoard';
 import { GameControls } from './components/GameControls';
+import { IconThemeToggle } from './components/IconThemeToggle';
 import { Overlay } from './components/Overlay';
 import { TICK_MS } from './logic/constants';
 import { advanceGame, createInitialState } from './logic/game';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useHighScore } from './hooks/useHighScore';
+import { useIconTheme } from './hooks/useIconTheme';
 import { useKeyboardDirection } from './hooks/useKeyboardDirection';
-import type { Direction } from './logic/types';
+import type { Direction, IconTheme } from './logic/types';
 import styles from './App.module.css';
 
 export default function App() {
-  const [state, setState] = useState(createInitialState);
+  const { theme, setTheme } = useIconTheme();
+  const [state, setState] = useState(() => createInitialState({ theme }));
   const { highScore, recordScore } = useHighScore();
   const prevStatusRef = useRef(state.status);
   const scoreRef = useRef(state.score);
@@ -83,6 +86,17 @@ export default function App() {
     setState((prev) => createInitialState({ theme: prev.theme }));
   }, []);
 
+  // Reflect the persisted theme preference into game state so logic/components
+  // read one source of truth. Switching at ANY time (incl. mid-game) only
+  // restyles — it never touches any other field, so the game never resets.
+  const handleThemeChange = useCallback(
+    (next: IconTheme) => {
+      setTheme(next);
+      setState((prev) => (prev.theme === next ? prev : { ...prev, theme: next }));
+    },
+    [setTheme],
+  );
+
   useKeyboardDirection({
     onDirection: handleDirection,
     onPause: handlePause,
@@ -108,6 +122,7 @@ export default function App() {
         <Entities
           pacman={state.pacman}
           ghosts={state.ghosts}
+          frightenedTimer={state.frightenedTimer}
           theme={state.theme}
         />
         <Overlay
@@ -125,6 +140,7 @@ export default function App() {
         onTogglePause={handlePause}
         onRestart={handleRestart}
       />
+      <IconThemeToggle theme={state.theme} onChange={handleThemeChange} />
     </main>
   );
 }

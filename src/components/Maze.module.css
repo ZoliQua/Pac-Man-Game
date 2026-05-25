@@ -21,6 +21,19 @@
 .wall {
   background: var(--wall-color);
   border-radius: 3px;
+  box-shadow: 0 0 0 0 var(--wall-glow);
+}
+
+/* Fog theme: dark slate walls gain a soft glowing halo. Pure presentation —
+ * the wall set and every hitbox are identical to the normal theme.
+ *
+ * IMPORTANT — CSS Modules descendant-selector coupling:
+ * Both `.theme-fog` and `.wall` (and `.dot`, `.powerDot` below) must stay in
+ * THIS file. Vite hashes them together, preserving the descendant relationship
+ * at build time. Splitting either class into a different module file would
+ * silently break theme styling — the scoped class names would no longer match. */
+.theme-fog .wall {
+  box-shadow: 0 0 6px var(--wall-glow);
 }
 
 .door {
@@ -53,4 +66,27 @@
   height: 12px;
   border-radius: 50%;
   background: var(--power-color);
+  box-shadow: 0 0 6px var(--power-glow);
+  animation: powerPulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes powerPulse {
+  from {
+    transform: scale(0.78);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Fog theme: faint glowing-orb pellets and a wider misty halo on power pellets. */
+.theme-fog .dot {
+  box-shadow: 0 0 4px var(--pellet-color);
+  opacity: 0.85;
+}
+
+.theme-fog .powerDot {
+  box-shadow: 0 0 10px var(--power-glow), 0 0 18px var(--power-glow);
 }

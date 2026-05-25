@@ -43,7 +43,7 @@ export function Maze({ pellets, powerPellets, theme = 'normal' }: Props) {
 
   return (
     <div
-      className={styles.maze}
+      className={`${styles.maze} ${styles[`theme-${theme}`]}`}
       role="grid"
       aria-label="Pac-Man maze"
       style={{
@@ -51,8 +51,10 @@ export function Maze({ pellets, powerPellets, theme = 'normal' }: Props) {
         gridTemplateRows: `repeat(${rows}, ${CELL_PX}px)`,
         background: spec.background,
         ['--wall-color' as string]: spec.wall,
+        ['--wall-glow' as string]: spec.wallGlow,
         ['--pellet-color' as string]: spec.pellet,
         ['--power-color' as string]: spec.powerPellet,
+        ['--power-glow' as string]: spec.powerGlow,
         ['--door-color' as string]: spec.door,
       }}
     >

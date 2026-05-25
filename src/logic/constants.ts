@@ -17,36 +17,59 @@ export const POINTS = {
 } as const;
 
 /**
- * Visual descriptor for a single icon theme. Phase 1 only needs the maze tiles
- * (wall / pellet / power pellet); the entity fields are minimal stubs to be
- * fleshed out in Phase 6.
+ * Visual descriptor for a single icon theme. A theme is COSMETIC ONLY: it maps
+ * each maze tile and entity to colour tokens (and a CSS class key) that the
+ * components consume. Switching themes never changes layout, hitboxes, speed,
+ * visibility, or any rule — only how things are drawn.
+ *
+ * The `key` is applied as a CSS class on the board roots (e.g. `theme-fog`) so
+ * stylesheets can add theme-specific glows / filters beyond the colour tokens.
  */
 export type ThemeSpec = {
+  /** Stable identifier, used as a CSS class hook (`theme-normal` / `theme-fog`). */
+  key: IconTheme;
   /** CSS colour for wall tiles. */
   wall: string;
+  /** Soft glow / outline colour applied to walls (foggy halo in `fog`). */
+  wallGlow: string;
   /** CSS colour for pellet dots. */
   pellet: string;
   /** CSS colour for power-pellet dots. */
   powerPellet: string;
+  /** Halo colour for the pulsing power pellet. */
+  powerGlow: string;
   /** CSS colour for the board background. */
   background: string;
   /** CSS colour for the ghost-house door. */
   door: string;
-  /** Entity colours (stub for Phase 1; expanded in Phase 6). */
+  /** Pac-Man body colour. */
   pacman: string;
+  /** Per-ghost body colours (kept distinguishable in both themes). */
   ghosts: {
     blinky: string;
     pinky: string;
     inky: string;
     clyde: string;
   };
+  /** Frightened-ghost body colour. */
+  frightened: string;
+  /** Alternate colour shown during the end-of-frightened flash. */
+  frightenedFlash: string;
+  /** Eye / pupil colours for normal ghosts and the eaten "eyes" state. */
+  eye: string;
+  pupil: string;
+  /** Per-entity opacity multiplier (1 = solid; `fog` uses < 1 for wisps). */
+  entityOpacity: number;
 };
 
 export const THEMES: Record<IconTheme, ThemeSpec> = {
   normal: {
+    key: 'normal',
     wall: '#2121de',
+    wallGlow: 'transparent',
     pellet: '#ffd9a8',
     powerPellet: '#ffb8ff',
+    powerGlow: '#ffb8ff',
     background: '#000000',
     door: '#ffb8ff',
     pacman: '#ffff00',
@@ -56,20 +79,33 @@ export const THEMES: Record<IconTheme, ThemeSpec> = {
       inky: '#00ffff',
       clyde: '#ffb852',
     },
+    frightened: '#2121de',
+    frightenedFlash: '#ffffff',
+    eye: '#ffffff',
+    pupil: '#2121de',
+    entityOpacity: 1,
   },
   fog: {
-    wall: '#3a4a5a',
-    pellet: '#9fb3c8',
-    powerPellet: '#cfe3ff',
-    background: '#0b0f14',
-    door: '#cfe3ff',
-    pacman: '#e6e6c8',
+    key: 'fog',
+    wall: '#27323f',
+    wallGlow: '#5a7a9a',
+    pellet: '#8fb0c8',
+    powerPellet: '#bfe0ff',
+    powerGlow: '#7fb8e6',
+    background: '#070b10',
+    door: '#9fc0d8',
+    pacman: '#dfe6d2',
     ghosts: {
-      blinky: '#c87a7a',
-      pinky: '#c8a8c8',
-      inky: '#8fb8c8',
-      clyde: '#c8a878',
+      blinky: '#a98a8a',
+      pinky: '#b8a0c0',
+      inky: '#8aa8c0',
+      clyde: '#bca888',
     },
+    frightened: '#3a5066',
+    frightenedFlash: '#cfe3ff',
+    eye: '#e8f0f8',
+    pupil: '#1a2530',
+    entityOpacity: 0.82,
   },
 };
 
