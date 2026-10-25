@@ -1,7 +1,9 @@
 # 🟡 Pac-Man
 
-A minimal, type-safe Pac-Man built with **React 18**, **Vite**, and **TypeScript**. Keyboard-first, grid-based DOM, no canvas, no external game engine — in the same spirit as its siblings [Snake-Game](https://github.com/ZoliQua/Snake-Game) and [Tetris-Game](https://github.com/ZoliQua/Tetris-Game).
+A minimal, type-safe Pac-Man built with **React 18**, **Vite** and **TypeScript** — keyboard-first, grid-based DOM, no canvas, no game engine.
+Runs on its own **and** as one of the six games of **[Zoltan's Arcade](https://github.com/ZoliQua/Arcade-Game-Center)**.
 
+[![CI](https://github.com/ZoliQua/Pac-Man-Game/actions/workflows/ci.yml/badge.svg)](https://github.com/ZoliQua/Pac-Man-Game/actions/workflows/ci.yml)
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![node](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white)
 ![react](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)
@@ -12,166 +14,205 @@ A minimal, type-safe Pac-Man built with **React 18**, **Vite**, and **TypeScript
 
 ## 📑 Table of contents
 
+- [The Zoltan's Arcade family](#-the-zoltans-arcade-family)
 - [Features](#-features)
+- [Quick start](#-quick-start)
+- [Controls](#%EF%B8%8F-controls)
+- [Scoring & stats](#-scoring--stats)
+- [Autosave & resume](#-autosave--resume)
+- [Embedding in Arcade-Game-Center](#-embedding-in-arcade-game-center)
 - [How it works](#-how-it-works)
-- [Icon themes](#-icon-themes)
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Controls](#-controls)
-- [Scoring](#-scoring)
 - [Scripts](#-scripts)
-- [Architecture](#-architecture)
-- [Integration](#-integration)
-- [License](#-license)
+- [Architecture](#%EF%B8%8F-architecture)
+- [Contributing](#-contributing)
+- [License](#%EF%B8%8F-license)
+
+## 🕹️ The Zoltan's Arcade family
+
+Every game is a standalone repo that also plugs into the portal. They share one design system, one scoring model and one save format through the vendored [`src/arcade/`](./src/arcade) kit.
+
+| Game | Repo | Genre |
+| --- | --- | --- |
+| 🏠 **Arcade portal** | [Arcade-Game-Center](https://github.com/ZoliQua/Arcade-Game-Center) | All games in one place, live demos, stats, leaderboard |
+| 🧱 Tetris | [Tetris-Game](https://github.com/ZoliQua/Tetris-Game) | Arcade |
+| 🐍 Snake | [Snake-Game](https://github.com/ZoliQua/Snake-Game) | Reflex |
+| 🔢 2048 | [2048-Game](https://github.com/ZoliQua/2048-Game) | Puzzle |
+| 🟡 **Pac-Man** (this repo) | [Pac-Man-Game](https://github.com/ZoliQua/Pac-Man-Game) | Maze |
+| ⚫ Gomoku | [Gomoku-Game](https://github.com/ZoliQua/Gomoku-Game) | Strategy |
+| 🦷 Tic-Tac-Toe | [Tic-Tac-Toe-Game](https://github.com/ZoliQua/Tic-Tac-Toe-Game) | Duel |
 
 ## ✨ Features
 
-- 🟡 **Classic Pac-Man** on the full 28×31 maze with pellets, power pellets, and a tunnel.
-- 👻 **Four ghosts with real AI** — Blinky, Pinky, Inky, and Clyde, each with their own target tile and scatter/chase alternation.
-- 😱 **Frightened & eaten modes** — power pellets flip ghosts to frightened (eatable, with a 200→400→800→1600 chain); eaten ghosts become eyes that path home and respawn.
-- ❤️ **Lives & levels** — start with 3 lives; clearing every pellet advances the level (score and lives carry over).
-- 🎨 **Two icon themes** — switch between **normal** (classic arcade) and **fog** (a muted, spooky reskin) at any time, even mid-game. Cosmetic only — no rule changes.
-- 🏆 **Persistent high score** kept in `localStorage` across refreshes.
-- ⌨️ **Keyboard-first** — arrows + WASD to steer, P to pause, R to restart.
-- 🧼 **Pure game logic** separated from UI; presentation is dumb on purpose.
-- 🎨 **CSS Modules** — no runtime CSS-in-JS, no layout jitter.
-- 🔒 **Type-safe** — strict TypeScript with no `any` escape hatches in game code.
+- 🟡 **Classic Pac-Man** on a 28×31 maze with pellets, four power pellets, a ghost house and a wrap-around tunnel
+- 👻 **Four ghosts with real AI** — Blinky, Pinky, Inky and Clyde, each with their own chase target and a classic scatter/chase schedule
+- 😱 **Frightened & eaten modes** — power pellets turn the ghosts blue (eat them for 200 → 400 → 800 → 1600); eaten ghosts become eyes that race home and respawn
+- ❤️ **Lives & levels** — 3 lives; clearing the maze starts the next level (score and lives carry over, the frightened window shrinks)
+- 🎨 **Two icon themes** — **normal** (classic arcade) or **fog** (a muted, spooky reskin), switchable any time, even mid-game; cosmetic only
+- 💾 **Autosave & resume** — close the tab mid-run and pick up where you left off, ghosts and all
+- 🏆 **Unified arcade stats** — best score, plays, total time, shared with the portal
+- ⏱️ **Pause-aware run timer**
+- 🌗 **Dark / light theme** shared with every arcade game (press **T**)
+- 🤖 **Attract-mode demo** (`<PacmanDemo />`) — the real engine driven by a ghost-aware BFS autopilot, shown on the portal's landing page
+- ⌨️ **Keyboard-first**; hotkeys are ignored while you type in a form field
+- 🧪 **Tested** — pure-logic unit tests plus component tests with Vitest + Testing Library
 
-## 🧠 How it works
+## 🚀 Quick start
 
-The game is a state machine:
-
-```
-idle → running ↔ paused
-running → dying → running          (life lost, lives > 0 → respawn)
-running → dying → gameOver         (life lost, lives === 0)
-running → levelClear → running     (all pellets eaten → next level)
-gameOver → (restart) → running
-```
-
-A single pure function, `advanceGame(state): GameState`, owns one tick of progression:
-
-1. Resolve Pac-Man's buffered turn (`nextDir`) when it is legal at the current tile node; otherwise continue in `dir` and stop dead at a wall.
-2. Move Pac-Man one tile, applying tunnel wrap.
-3. Eat any pellet / power pellet under him (award points; a power pellet flips eligible ghosts to frightened and resets the eat chain).
-4. Advance each ghost by its mode: scatter/chase target tiles, deterministic frightened wander (slower), or eyes pathing home when eaten.
-5. Resolve Pac-Man ↔ ghost collisions: eat a frightened ghost, or lose a life against a live one.
-6. Drive the brief `dying` / `levelClear` transitions and the scatter/chase phase schedule.
-
-Movement is **tile-stepped** and the `logic/` layer is fully pure and deterministic (no `Math.random` — the frightened wander is derived from state). The render loop is a React hook (`useGameLoop`) that runs a fresh `setInterval` only while the game is live, using a latest-state ref to avoid stale closures. Input is captured by a single `keydown` listener (`useKeyboardDirection`) that calls `preventDefault()` on arrows so the page never scrolls mid-play.
-
-## 🎨 Icon themes
-
-Two selectable icon sets restyle Pac-Man, the four ghosts, frightened/eaten ghosts, pellets, power pellets, and the maze walls. The toggle works at any time — including mid-game — and **never** resets the board or changes any rule, hitbox, speed, or visibility. It is an icon set, **not** a fog-of-war mode.
-
-- **normal** — classic arcade: yellow Pac-Man with an animated mouth; Blinky red / Pinky pink / Inky cyan / Clyde orange; cream pellets; pulsing power pellets; blue rounded walls; frightened = blue (flashing white near expiry); eaten = white eyes.
-- **fog** — a muted, foggy reskin of the same entities: pale ghostly Pac-Man; desaturated grey/blue wisp ghosts (still distinct); faint glowing-orb pellets; misty-halo power pellets; dark slate walls with a soft glow; frightened = dim mist; eaten = faint eyes.
-
-The choice is persisted to `localStorage` under `pacman.iconTheme` (default `normal`).
-
-## 📦 Requirements
-
-- 🟢 **Node ≥ 20**
-- 📦 **npm** (the lockfile is committed as `package-lock.json`)
-
-## 🚀 Installation
+Requires **Node ≥ 20** and npm.
 
 ```bash
 git clone https://github.com/ZoliQua/Pac-Man-Game.git
 cd Pac-Man-Game
 npm install
+npm run dev          # http://localhost:5173
 ```
 
-## 🕹️ Usage
-
-Start the dev server:
-
-```bash
-npm run dev
-```
-
-Then open `http://localhost:5173` in a modern desktop browser.
-
-For a production build:
-
-```bash
-npm run build
-npm run preview
-```
+Production build: `npm run build && npm run preview`. The build uses relative asset paths, so `dist/` can be served from any sub-folder.
 
 ## ⌨️ Controls
 
-| Key                           | Action                |
-| ----------------------------- | --------------------- |
-| ⬆️ / ⬇️ / ⬅️ / ➡️             | Set desired direction |
-| **W** / **A** / **S** / **D** | Set desired direction |
-| **P**                         | Pause / Resume        |
-| **R**                         | Restart               |
+| Key | Action |
+| --- | --- |
+| ⬆️ ⬇️ ⬅️ ➡️ / **W A S D** | Steer (a direction key also starts a new game) |
+| **Space** / **Enter** | Start · pause · resume |
+| **P** / **Esc** | Pause / resume |
+| **R** | Restart |
+| **T** | Toggle dark / light theme (standalone page) |
 
-Input only buffers a *desired* direction; the actual turn is applied by the logic when the current tile node makes it legal.
+Input only buffers a *desired* direction; the logic applies the turn at the first tile where it is legal, and Pac-Man stops dead at walls.
 
-## 🎯 Scoring
+## 🎯 Scoring & stats
 
-| Event                | Points                      |
-| -------------------- | --------------------------- |
-| Pellet               | 10                          |
-| Power pellet         | 50                          |
-| Ghost (frightened)   | 200 → 400 → 800 → 1600      |
+| Event | Points |
+| --- | --- |
+| Pellet | 10 |
+| Power pellet | 50 |
+| Ghost (frightened) | 200 → 400 → 800 → 1600 |
 
-The ghost chain resets on each power pellet, not per level. The **best score** is persisted to `localStorage` under the key `pacman.highScore`, written only when strictly higher. Clear your site data to reset it.
+The ghost chain resets on each power pellet, not per level. The frightened window lasts 6 s on level 1 and
+shrinks by about 0.5 s per level (minimum 1 s). Levels repeat forever, so every run ends when the last life is lost
+(outcome `over`).
+
+When a run ends the kit records it once in `localStorage` under `arcade.stats.pacman`
+(`best`, `plays`, `wins`, `totalScore`, `totalSeconds`, `lastScore`, `lastPlayedAt`).
+The legacy `pacman.highScore` key is migrated and kept in sync, so older builds keep their record.
+
+### 🎨 Icon themes
+
+Two icon sets restyle Pac-Man, the ghosts, pellets and walls. Switching **never** resets the board or changes any
+rule, hitbox, speed or visibility — it is an icon set, not a fog-of-war mode.
+
+- **normal** — yellow Pac-Man with an animated mouth; Blinky red / Pinky pink / Inky cyan / Clyde orange; cream pellets; pulsing power pellets; blue walls; frightened = blue (flashing white near expiry); eaten = eyes.
+- **fog** — pale ghostly Pac-Man; desaturated wisp ghosts (still distinct); faint glowing-orb pellets; misty power pellets; dark slate walls with a soft glow.
+
+The choice is stored under `pacman.iconTheme` (default `normal`).
+
+## 💾 Autosave & resume
+
+While a run is in progress it is saved about once a second and whenever the page is hidden or the game is unmounted
+(key `arcade.session.pacman`, schema-versioned). The save holds the full game: remaining dots, Pac-Man, all four
+ghosts with their modes and positions, the scatter/chase and frightened timers, lives, level and score. It is
+validated strictly on load (`src/logic/persist.ts`) and dropped if anything is off. Reloading shows **Welcome back**
+with the restored run paused. **Discard** next to the *Autosaved* badge throws the save away. Finished runs clear
+their save automatically.
+
+## 🧩 Embedding in Arcade-Game-Center
+
+```tsx
+import { PacmanGame, PacmanDemo } from '@arcade/pacman';
+
+<PacmanGame
+  embedded                                   // hide the page title; the portal shows it
+  onGameOver={(score) => submitScore('pacman', score)}
+  onStatusChange={({ status, score, seconds }) => updateHeader(status, seconds)}
+/>
+<PacmanDemo active={cardIsVisible} />         // landing-page attract mode
+```
+
+Both components follow the shared `ArcadeGameProps` / `ArcadeDemoProps` contract from `src/arcade/types.ts`.
+
+## 🧠 How it works
+
+The game's own state machine and how it maps onto the shared arcade lifecycle:
+
+```
+idle → running ↔ paused
+running → dying → running          (life lost, lives > 0 → respawn)
+running → dying → gameOver         (life lost, last life)
+running → levelClear → running     (all pellets eaten → next level)
+gameOver → (restart) → running
+```
+
+| Game status | Arcade status |
+| --- | --- |
+| `idle` | `idle` |
+| `running`, `dying`, `levelClear` | `running` (the clock keeps ticking through the short pauses) |
+| `paused` | `paused` |
+| `gameOver` | `gameOver` — the only state that ends a run |
+
+A single pure function, `advanceGame(state): GameState`, owns one 150 ms tick:
+
+1. Resolve Pac-Man's buffered turn (`nextDir`) when legal; otherwise continue in `dir` and stop dead at a wall. The ghost-house door blocks Pac-Man only.
+2. Move Pac-Man one tile (tunnel wrap) and eat the pellet / power pellet under him. A power pellet frightens every ghost outside the house, forces a reversal and resets the eat chain.
+3. Run the scatter/chase schedule (7 s / 20 s / 7 s / 20 s / 5 s / 20 s / 5 s / chase forever); each phase change forces one reversal.
+4. Move each ghost by its mode. At every tile it picks the non-reversing neighbour closest to its target (tie-break up > left > down > right):
+   - **Blinky** targets Pac-Man; **Pinky** 4 tiles ahead of him; **Inky** doubles the vector from Blinky to 2 tiles ahead of Pac-Man; **Clyde** chases when ≥ 8 tiles away, otherwise retreats to his corner.
+   - **Frightened** ghosts move at half speed with deterministic pseudo-random turns (no `Math.random` — derived from state).
+   - **Eaten** ghosts (eyes) path back to the house and re-enter play in the scheduled mode.
+   - Pinky leaves the house immediately, Inky after 30 dots, Clyde after 60.
+5. Resolve collisions (same tile or a pass-through swap): eat a frightened ghost, ignore eyes, or start `dying`.
+6. Eating the last dot starts `levelClear` (it wins over a simultaneous ghost hit).
+
+The demo autopilot (`src/logic/autopilot.ts`) runs a BFS from Pac-Man at every tile — towards a nearby frightened
+ghost while enough frightened time remains, otherwise the nearest dot — never stepping within two tiles of a live
+ghost, and falls back to the move that keeps the most distance. It typically clears several levels before losing.
+
+`useGameLoop` runs an interval only while playing, reading the latest callback from a ref (no stale closures).
+`useKeyboardDirection` attaches one window listener for the component's lifetime.
 
 ## 🧪 Scripts
 
-| Script                | Purpose                              |
-| --------------------- | ------------------------------------ |
-| `npm run dev`         | Start the local dev server (Vite)    |
-| `npm run build`       | Type-check and produce a prod bundle |
-| `npm run preview`     | Preview the production build         |
-| `npm run typecheck`   | Run `tsc --noEmit`                   |
-| `npm run lint`        | Run ESLint across the project        |
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Vite dev server |
+| `npm run build` | Type-check (`tsc -b`) and production build |
+| `npm run preview` | Serve the production build |
+| `npm run typecheck` | `tsc -b` |
+| `npm run lint` | ESLint |
+| `npm test` | Vitest (logic + component tests) |
+| `npm run check` | lint → typecheck → test → build (what CI runs) |
 
 ## 🏗️ Architecture
 
-Logic lives outside presentation. Game rules never leak into JSX, and `src/logic/*` imports nothing from `react` or `src/components/*`.
-
 ```
 src/
-  logic/         pure game rules
-    types.ts       shared types (Vec, Direction, Ghost, GameState, IconTheme, ...)
-    constants.ts   tick, point values, scatter/chase table, frightened timing, THEMES
-    maze.ts        MAZE: string[] + parseMaze() → walls / pellets / spawns / tunnel
-    grid.ts        key, parseKey, inBounds, isWall, neighbour, legalDirs, tunnelWrap
-    movement.ts    step, atNode, buffered-turn helpers
-    pacman.ts      nextPacman(state) — buffered/desired direction + wall stop
-    ghosts.ts      target tiles, chooseDir, frightened wander, advanceGhost
-    scoring.ts     pellet / power / ghost-chain point helpers
-    game.ts        advanceGame(state) tick + createInitialState(overrides)
-  hooks/
-    useGameLoop.ts          interval bound to live states; no stale closures
-    useKeyboardDirection.ts arrows + WASD + P + R
-    useHighScore.ts         localStorage-backed best score (pacman.highScore)
-    useIconTheme.ts         normal/fog preference (pacman.iconTheme)
-  components/
-    Maze.tsx            grid: walls + pellets + power pellets (theme-aware)
-    Entities.tsx        Pac-Man + 4 ghosts overlay (theme-aware, animated)
-    ScoreBoard.tsx      score + lives + level + best + status
-    GameControls.tsx    start / pause / restart
-    IconThemeToggle.tsx normal ↔ fog
-    Overlay.tsx         idle / paused / levelClear / gameOver
-  styles/
-  App.tsx             state machine + wiring
-  main.tsx            React entry
+  arcade/              vendored Zoltan's Arcade kit — do not edit here (see its README)
+  logic/               pure game rules (no React)
+    types.ts constants.ts grid.ts movement.ts scoring.ts
+    maze.ts            MAZE: string[] + parseMaze() / validateMaze() → PARSED_MAZE
+    pacman.ts          nextPacman — buffered turns, wall stop, door blocking
+    ghosts.ts          targetTile, chooseDir, frightenedDir, advanceGhost
+    game.ts            advanceGame + createInitialState + settleTransition + arcadeStatus
+    autopilot.ts       ghost-aware BFS steering + demoStep for the demo
+    persist.ts         JSON-safe save shape + strict runtime validation
+  hooks/               useGameLoop, useKeyboardDirection, useIconTheme
+  components/          GameBoard (full + mini) = Maze + Entities, IconThemeToggle
+  demo/PacmanDemo.tsx  landing-page attract mode
+  PacmanGame.tsx       the embeddable game (ArcadeGameProps)
+  App.tsx              standalone page: <ArcadeShell><PacmanGame/></ArcadeShell>
+  main.tsx             entry; loads the shared arcade.css once
+  index.ts             package entry used by Arcade-Game-Center
 ```
 
-## 🔌 Integration
+## 🤝 Contributing
 
-Ships as a standalone repo with a `default export App`, so the Arcade portal can later pull it in as a component package (`PacManGame.tsx`), exactly like `SnakeGame.tsx` / `TetrisGame.tsx`. No leaderboard / score-posting code lives inside this repo — that is the portal's responsibility.
+See [CONTRIBUTING.md](./CONTRIBUTING.md), the [Code of Conduct](./CODE_OF_CONDUCT.md) and [SECURITY.md](./SECURITY.md).
+Contributors are listed in [CONTRIBUTORS.md](./CONTRIBUTORS.md); changes in [CHANGELOG.md](./CHANGELOG.md).
 
 ## ⚖️ License
 
-Released under the [MIT License](./LICENSE). © 2026 Zoltan Dul.
+[MIT](./LICENSE) © 2026 Zoltán Dul
 
 ---
 
-<p align="center">Made with ❤️ by Zoltan Dul</p>
+<p align="center">Made with ❤️ by Zoltán Dul · part of <a href="https://github.com/ZoliQua/Arcade-Game-Center">Zoltan's Arcade</a></p>
