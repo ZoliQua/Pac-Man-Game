@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { CELL_PX, THEMES } from '../logic/constants';
+import { memo, useMemo } from 'react';
+import { THEMES } from '../logic/constants';
 import { key } from '../logic/grid';
 import { PARSED_MAZE } from '../logic/maze';
 import type { IconTheme } from '../logic/types';
@@ -11,6 +11,8 @@ type Props = {
   /** Live (uneaten) power-pellet keys from game state. */
   powerPellets: Set<string>;
   theme?: IconTheme;
+  /** `mini` drops the ARIA grid roles (the demo is decorative). */
+  mini?: boolean;
 };
 
 type CellKind = 'wall' | 'pellet' | 'power' | 'door' | 'empty';
@@ -20,7 +22,12 @@ type CellKind = 'wall' | 'pellet' | 'power' | 'door' | 'empty';
 // contains the live pellet sets that actually drive re-renders.
 const { walls, doorTiles, cols, rows } = PARSED_MAZE;
 
-export function Maze({ pellets, powerPellets, theme = 'normal' }: Props) {
+/**
+ * The static maze plus the live pellets. Memoised: the pellet Sets only change
+ * identity when something is eaten, so most ticks skip re-rendering 868 cells.
+ * Cell size comes from the `--cell` custom property set by GameBoard.
+ */
+export const Maze = memo(function Maze({ pellets, powerPellets, theme = 'normal', mini = false }: Props) {
   const spec = THEMES[theme];
 
   const cells = useMemo(() => {
@@ -44,11 +51,11 @@ export function Maze({ pellets, powerPellets, theme = 'normal' }: Props) {
   return (
     <div
       className={`${styles.maze} ${styles[`theme-${theme}`]}`}
-      role="grid"
-      aria-label="Pac-Man maze"
+      role={mini ? undefined : 'grid'}
+      aria-label={mini ? undefined : 'Pac-Man maze'}
       style={{
-        gridTemplateColumns: `repeat(${cols}, ${CELL_PX}px)`,
-        gridTemplateRows: `repeat(${rows}, ${CELL_PX}px)`,
+        gridTemplateColumns: `repeat(${cols}, var(--cell))`,
+        gridTemplateRows: `repeat(${rows}, var(--cell))`,
         background: spec.background,
         ['--wall-color' as string]: spec.wall,
         ['--wall-glow' as string]: spec.wallGlow,
@@ -58,20 +65,12 @@ export function Maze({ pellets, powerPellets, theme = 'normal' }: Props) {
         ['--door-color' as string]: spec.door,
       }}
     >
-      {cells.map((kind, i) => {
-        const x = i % cols;
-        const y = Math.floor(i / cols);
-        return (
-          <div
-            key={`${x}-${y}`}
-            className={`${styles.cell} ${styles[kind]}`}
-            role="gridcell"
-          >
-            {kind === 'pellet' ? <span className={styles.dot} /> : null}
-            {kind === 'power' ? <span className={styles.powerDot} /> : null}
-          </div>
-        );
-      })}
+      {cells.map((kind, i) => (
+        <div key={i} className={`${styles.cell} ${styles[kind]}`} role={mini ? undefined : 'gridcell'}>
+          {kind === 'pellet' ? <span className={styles.dot} /> : null}
+          {kind === 'power' ? <span className={styles.powerDot} /> : null}
+        </div>
+      ))}
     </div>
   );
-}
+});

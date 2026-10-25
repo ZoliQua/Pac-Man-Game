@@ -1,27 +1,26 @@
+/* The layer covers the maze; entities are offset by the maze's padding +
+ * border (both custom properties from GameBoard) so tile (0,0) lines up. */
 .layer {
   position: absolute;
-  top: 0;
-  left: 0;
-  /* COUPLING: these must match the Maze's padding(4px) + border(2px) so the
-   * overlay's tile (0,0) aligns with the maze's tile (0,0). If the Maze padding
-   * or border changes, update these (and .pacman's top/left below) too. */
-  padding: 4px;
-  border: 2px solid transparent;
+  inset: 0;
   pointer-events: none;
 }
 
-.pacman {
+.pacman,
+.ghost {
   position: absolute;
-  /* COUPLING: top/left must match the Maze's padding(4px) + border(2px) =
-   * the offset to tile (0,0). Keep in sync with .layer above and the Maze
-   * padding/border so a maze padding change won't silently misalign Pac-Man. */
-  top: 4px;
-  left: 4px;
+  top: calc(var(--pad) + var(--maze-border));
+  left: calc(var(--pad) + var(--maze-border));
+  width: var(--cell);
+  height: var(--cell);
+  opacity: var(--entity-opacity, 1);
+}
+
+.pacman {
   border-radius: 50%;
   background: var(--pacman-color);
-  opacity: var(--entity-opacity, 1);
-  /* Mouth wedge animates open/closed via clip-path keyframes; the parent
-   * transform (set inline) rotates it to face the travel direction. */
+  transform: translate(calc(var(--x) * var(--cell)), calc(var(--y) * var(--cell))) rotate(var(--rot, 0deg));
+  /* Mouth wedge animates open/closed via clip-path keyframes. */
   animation: chomp 0.32s steps(1, end) infinite;
 }
 
@@ -37,25 +36,20 @@
 }
 
 .ghost {
-  position: absolute;
-  /* COUPLING: top/left must match the Maze's padding(4px) + border(2px), like
-   * .pacman above, so ghost tile (0,0) aligns with the maze. */
-  top: 4px;
-  left: 4px;
   background: var(--ghost-color);
-  opacity: var(--entity-opacity, 1);
+  transform: translate(calc(var(--x) * var(--cell)), calc(var(--y) * var(--cell)));
   /* Rounded "hood" top, flat body bottom — a simple ghost silhouette. */
   border-radius: 45% 45% 12% 12% / 60% 60% 12% 12%;
   transition: background 80ms linear;
 }
 
-/* Eyes: two small white ovals with a coloured pupil that shifts toward the
- * ghost's travel direction (inline transform on .pupil). */
+/* Eyes: two small ovals with a pupil shifted toward the travel direction. */
 .eyes {
   position: absolute;
   top: 26%;
   left: 0;
   width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   gap: 14%;
@@ -79,8 +73,7 @@
   border-radius: 50%;
 }
 
-/* Frightened: no eyes, body uses the themed frightened colour (set inline).
- * The flash colour is swapped inline in the final FRIGHTENED_FLASH_TICKS. */
+/* Frightened: no eyes; body colour (and the end-of-window flash) set inline. */
 .frightened {
   background: var(--ghost-color);
 }
@@ -94,19 +87,20 @@
   top: 32%;
 }
 
-/* Fog theme: soft glow + slight blur make the entities read as drifting wisps,
- * without changing their tile positions or sizes. Cosmetic only.
- *
- * IMPORTANT — CSS Modules descendant-selector coupling:
- * Both `.theme-fog` and `.pacman` / `.ghost` must stay in THIS file. Vite
- * hashes them together, preserving the descendant relationship at build time.
- * Splitting either class into a different module file would silently break
- * theme styling — the scoped class names would no longer match. */
+/* Fog theme: soft glow makes the entities read as drifting wisps, without
+ * changing their tile positions or sizes. Keep `.theme-fog` and the entity
+ * classes in THIS module so the hashed descendant selectors keep matching. */
 .theme-fog .pacman {
-  filter: drop-shadow(0 0 4px rgba(223, 230, 210, 0.55));
+  filter: drop-shadow(0 0 calc(var(--cell) * 0.2) rgba(223, 230, 210, 0.55));
 }
 
 .theme-fog .ghost {
-  filter: drop-shadow(0 0 5px rgba(120, 160, 200, 0.5));
+  filter: drop-shadow(0 0 calc(var(--cell) * 0.25) rgba(120, 160, 200, 0.5));
   border-radius: 48% 48% 16% 16% / 64% 64% 16% 16%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pacman {
+    animation: none;
+  }
 }

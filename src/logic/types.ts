@@ -45,5 +45,4 @@ export type GameState = {
   // for both (only one transition state is active at a time), avoiding two
   // separate timer fields. 0 outside those states.
   transitionTimer: number;
-  theme: IconTheme;
 };

@@ -1,5 +1,4 @@
 import {
-  DEFAULT_THEME,
   DYING_PAUSE_TICKS,
   LEVELCLEAR_PAUSE_TICKS,
   SCATTER_CHASE,
@@ -62,7 +61,7 @@ function createGhosts(): Ghost[] {
 
 /**
  * The pristine starting state, derived from the parsed maze. `overrides` lets a
- * restart preserve user preferences (e.g. `theme`).
+ * test or a restored session seed specific fields.
  */
 export function createInitialState(
   overrides: Partial<GameState> = {},
@@ -82,14 +81,13 @@ export function createInitialState(
     frightenedTimer: 0,
     ghostChain: 0,
     transitionTimer: 0,
-    theme: DEFAULT_THEME,
     ...overrides,
   };
 }
 
 /**
  * Reset Pac-Man and the ghosts to their spawns (fresh `createGhosts`) while
- * preserving everything else (score, lives, level, pellets, theme). Used by
+ * preserving everything else (score, lives, level, pellets). Used by
  * both the death-respawn and the level-advance transitions. Also clears the
  * scatter/chase scheduler back to phase 0 and the frightened/chain counters —
  * callers set those fields explicitly too, but doing it here keeps the helper
@@ -321,7 +319,7 @@ export function advanceGame(state: GameState): GameState {
 /**
  * `dying` transition: entities frozen, `transitionTimer` counts down. On expiry
  * either game over (lives reach 0) or respawn entities and resume running
- * (lives−1; score/level/pellets/theme preserved).
+ * (lives−1; score/level/pellets preserved).
  */
 function advanceDying(state: GameState): GameState {
   const transitionTimer = state.transitionTimer - 1;
@@ -362,4 +360,36 @@ function advanceLevelClear(state: GameState): GameState {
     transitionTimer: 0,
     status: 'running',
   };
+}
+
+/**
+ * Fast-forward a brief `dying` / `levelClear` transition to the state it
+ * resolves to (respawned `running`, next level, or `gameOver`). Used when a
+ * saved session is restored mid-transition, because a restored run is always
+ * shown paused and the transition timer cannot count down while paused.
+ */
+export function settleTransition(state: GameState): GameState {
+  let s = state;
+  while (s.status === 'dying' || s.status === 'levelClear') s = advanceGame(s);
+  return s;
+}
+
+/**
+ * Map the game's own state machine onto the shared arcade lifecycle. The brief
+ * `dying` / `levelClear` pauses are part of active play (the clock keeps
+ * running); only `gameOver` — the last life lost — ends a run.
+ */
+export function arcadeStatus(status: GameStatus): 'idle' | 'running' | 'paused' | 'gameOver' {
+  switch (status) {
+    case 'idle':
+      return 'idle';
+    case 'paused':
+      return 'paused';
+    case 'gameOver':
+      return 'gameOver';
+    case 'running':
+    case 'dying':
+    case 'levelClear':
+      return 'running';
+  }
 }

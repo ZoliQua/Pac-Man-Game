@@ -1,10 +1,15 @@
+import { useId } from 'react';
 import type { IconTheme } from '../logic/types';
-import styles from './IconThemeToggle.module.css';
 
 type Props = {
   theme: IconTheme;
   onChange: (theme: IconTheme) => void;
 };
+
+const OPTIONS: { value: IconTheme; label: string }[] = [
+  { value: 'normal', label: 'Normal' },
+  { value: 'fog', label: 'Fog' },
+];
 
 /**
  * Switches the icon set between `normal` (classic arcade) and `fog` (muted,
@@ -12,20 +17,17 @@ type Props = {
  * mid-game, without resetting the board.
  */
 export function IconThemeToggle({ theme, onChange }: Props) {
-  const isFog = theme === 'fog';
+  const labelId = useId();
   return (
-    <label className={styles.wrap}>
-      <span className={styles.label}>Icon theme</span>
-      <input
-        type="checkbox"
-        className={styles.checkbox}
-        checked={isFog}
-        onChange={(event) => onChange(event.target.checked ? 'fog' : 'normal')}
-        aria-label="Switch icon theme"
-      />
-      <span className={styles.state} aria-live="polite">
-        {isFog ? 'Fog' : 'Normal'}
-      </span>
-    </label>
+    <div className="arc-field">
+      <span id={labelId}>Icon theme</span>
+      <div className="arc-segmented" role="group" aria-labelledby={labelId}>
+        {OPTIONS.map((o) => (
+          <button key={o.value} type="button" aria-pressed={theme === o.value} onClick={() => onChange(o.value)}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

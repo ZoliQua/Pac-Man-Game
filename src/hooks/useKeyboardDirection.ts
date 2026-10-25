@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { ARCADE_KEYS, isKey, shouldIgnoreKey } from '../arcade';
 import type { Direction } from '../logic/types';
 
 const KEY_TO_DIRECTION: Record<string, Direction> = {
@@ -20,50 +21,53 @@ const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 
 export type KeyboardDirectionHandlers = {
   onDirection: (direction: Direction) => void;
-  onPause?: () => void;
+  /** Space / Enter: start when idle or over, otherwise pause/resume. */
+  onPrimary?: () => void;
+  /** P / Esc. */
+  onTogglePause?: () => void;
   onRestart?: () => void;
 };
 
 /**
- * Single `keydown` listener (attached once per mount, cleaned up on unmount):
- * arrow keys + WASD buffer the desired direction; `P` pauses/resumes; `R`
- * restarts. Arrow keys `preventDefault` so the page never scrolls. Mirrors the
- * Snake-Game listener hygiene.
+ * Arrows + WASD buffer the desired direction (the logic applies it at the next
+ * legal tile). One window listener for the lifetime of the component; handlers are read
+ * from a ref so re-renders never re-subscribe. Typing in form fields and
+ * modifier shortcuts (Cmd+R, Ctrl+W, …) are left to the browser.
  */
 export function useKeyboardDirection(handlers: KeyboardDirectionHandlers): void {
-  // App passes a fresh `handlers` object literal every render (every tick).
-  // Mirror useGameLoop: keep the latest handlers in a ref so the listener body
-  // reads current values, but attach the listener itself only once per mount.
-  const handlersRef = useRef(handlers);
-  handlersRef.current = handlers;
+  const ref = useRef(handlers);
+  ref.current = handlers;
 
-  // Empty deps → single `keydown` listener added on mount, removed on unmount.
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (ARROW_KEYS.has(event.key)) {
-        event.preventDefault();
-      }
+      if (shouldIgnoreKey(event)) return;
+      const h = ref.current;
 
-      const current = handlersRef.current;
       const direction = KEY_TO_DIRECTION[event.key];
       if (direction) {
-        current.onDirection(direction);
+        if (ARROW_KEYS.has(event.key)) event.preventDefault();
+        h.onDirection(direction);
         return;
       }
 
-      if ((event.key === 'p' || event.key === 'P') && current.onPause) {
-        current.onPause();
+      if ((event.key === ' ' || event.key === 'Enter') && h.onPrimary) {
+        event.preventDefault();
+        h.onPrimary();
         return;
       }
 
-      if ((event.key === 'r' || event.key === 'R') && current.onRestart) {
-        current.onRestart();
+      if (isKey(event, ARCADE_KEYS.pause) && h.onTogglePause) {
+        event.preventDefault();
+        h.onTogglePause();
+        return;
+      }
+
+      if (isKey(event, ARCADE_KEYS.restart) && h.onRestart) {
+        h.onRestart();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 }

@@ -11,7 +11,7 @@ type PacmanState = { pos: Vec; dir: Direction; nextDir: Direction };
  * (ghosts must pass through them) but Pac-Man must never enter — otherwise he
  * could walk into the sealed house and die on the parked ghosts.
  */
-function pacCanMove(
+export function pacCanMove(
   pos: Vec,
   dir: Direction,
   walls: Set<string>,

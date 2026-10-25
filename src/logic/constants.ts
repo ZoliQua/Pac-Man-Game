@@ -3,9 +3,6 @@ import type { GhostName, IconTheme, Vec } from './types';
 /** Milliseconds per game tick (one tile step per entity). */
 export const TICK_MS = 150;
 
-/** Rendered pixel size of a single maze cell. */
-export const CELL_PX = 20;
-
 /** Starting number of lives. */
 export const START_LIVES = 3;
 

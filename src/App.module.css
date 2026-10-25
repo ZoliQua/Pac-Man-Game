@@ -1,39 +1,41 @@
-.app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 24px;
+.game {
+  max-width: 940px;
 }
 
-.title {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: 4px;
-  color: #ffff00;
-  text-transform: uppercase;
+.layout {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 280px);
+  gap: 18px;
+  align-items: start;
+  justify-content: center;
 }
 
 .boardWrap {
-  position: relative;
+  justify-self: center;
 }
 
-/*
- * Responsive board sizing (desktop-first). The maze is a fixed 28×31 grid at
- * CELL_PX (=20px) → ~572px wide incl. padding/border. On shorter or narrower
- * viewports we scale the whole board down uniformly so it always fits, keeping
- * the aspect ratio and every tile/hitbox proportion intact. Cosmetic only.
- */
-@media (max-height: 800px), (max-width: 620px) {
-  .boardWrap {
-    transform: scale(0.85);
-    transform-origin: top center;
-  }
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-@media (max-height: 680px), (max-width: 520px) {
-  .boardWrap {
-    transform: scale(0.7);
-    transform-origin: top center;
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.buttons > * {
+  flex: 1;
+}
+
+.save {
+  margin-top: 10px;
+  min-height: 16px;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
   }
 }

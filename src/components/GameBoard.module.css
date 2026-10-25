@@ -1,0 +1,30 @@
+/* One source of truth for tile geometry; Maze and Entities read these. */
+.board {
+  --cell: 20px;
+  --pad: 4px;
+  --maze-border: 2px;
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.mini {
+  --cell: 5.5px;
+  --pad: 2px;
+  --maze-border: 1px;
+  box-shadow: none;
+}
+
+@media (max-height: 820px) {
+  .board:not(.mini) {
+    --cell: 17px;
+  }
+}
+
+@media (max-height: 680px), (max-width: 620px) {
+  .board:not(.mini) {
+    --cell: 12px;
+  }
+}
