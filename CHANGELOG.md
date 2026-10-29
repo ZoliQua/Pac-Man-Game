@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-11-13
+
+### Changed
+
+- Vendored kit (`src/arcade/`) updated: the registry knows the three new arcade games — Breakout, Space Invaders and
+  Connect Four — with their accent colours; the duel round-score docs mention Connect Four.
+- README: the Zoltan's Arcade family table lists all nine games.
+
 ## [1.0.0] — 2026-10-24
 
 ### Added

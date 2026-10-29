@@ -1,7 +1,7 @@
 {
   "name": "pac-man-game",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Type-safe Pac-Man in React + Vite + TypeScript — four ghost AIs, frightened chains, lives & levels, normal/fog icon themes, autosave & resume, shared Zoltan’s Arcade stats. Part of Arcade-Game-Center.",
   "license": "MIT",
