@@ -6,15 +6,16 @@
  * Edit it only in Arcade-Game-Center/packages/kit and run `npm run sync:kit`.
  */
 
-export type ArcadeGameId = 'tetris' | 'snake' | '2048' | 'pacman' | 'gomoku' | 'tictactoe';
+export type ArcadeGameId = 'tetris' | 'snake' | '2048' | 'pacman' | 'gomoku' | 'tictactoe'
+  | 'breakout' | 'invaders' | 'connect4';
 
 /** Lifecycle every game maps its own state machine onto. */
 export type ArcadeStatus = 'idle' | 'running' | 'paused' | 'gameOver';
 
 /**
- * How a run ended. Score-attack games (Tetris, Snake, 2048, Pac-Man) end with
- * `over` (or `win` when the board is cleared / 2048 reached); duel games
- * (Gomoku, Tic-Tac-Toe) end with `win` / `loss` / `draw` from the player's side.
+ * How a run ended. Score-attack games (Tetris, Snake, 2048, Pac-Man, Breakout,
+ * Space Invaders) end with `over` (or `win` when the board is cleared / 2048
+ * reached); duel games (Gomoku, Tic-Tac-Toe, Connect Four) end with `win` / `loss` / `draw` from the player's side.
  */
 export type RunOutcome = 'win' | 'loss' | 'draw' | 'over';
 

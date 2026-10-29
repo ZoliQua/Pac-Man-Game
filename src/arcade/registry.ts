@@ -72,6 +72,30 @@ export const ARCADE_GAMES: readonly ArcadeGameInfo[] = [
     tagline: 'Three in a row with tooth or X/O marks. The hard AI never loses.',
     colorVar: '--game-tictactoe',
   },
+  {
+    id: 'breakout',
+    name: 'Breakout',
+    repo: 'https://github.com/ZoliQua/Breakout-Game',
+    tag: 'Paddle',
+    tagline: 'Bounce the ball, smash every brick. Power-ups, multiball, faster each level.',
+    colorVar: '--game-breakout',
+  },
+  {
+    id: 'invaders',
+    name: 'Space Invaders',
+    repo: 'https://github.com/ZoliQua/Space-Invaders-Game',
+    tag: 'Shooter',
+    tagline: 'Hold the line against marching alien waves. Crumbling bunkers, mystery UFO.',
+    colorVar: '--game-invaders',
+  },
+  {
+    id: 'connect4',
+    name: 'Connect Four',
+    repo: 'https://github.com/ZoliQua/Connect-Four-Game',
+    tag: 'Duel',
+    tagline: 'Drop discs, line up four. A 7×6 classic against an α-β minimax AI — or a friend.',
+    colorVar: '--game-connect4',
+  },
 ];
 
 export function gameInfo(id: ArcadeGameId): ArcadeGameInfo {

@@ -1,8 +1,8 @@
 import type { RunOutcome } from './types';
 
 /**
- * Unified points for round-based duel games (Gomoku, Tic-Tac-Toe) so they
- * share the score scale used by stats and the leaderboard:
+ * Unified points for round-based duel games (Gomoku, Tic-Tac-Toe, Connect Four)
+ * so they share the score scale used by stats and the leaderboard:
  * - win: base × (1 + share of the board still empty) → faster wins pay up to 2× base,
  * - draw: a quarter of base (a draw against the unbeatable AI still counts),
  * - loss: 0.
