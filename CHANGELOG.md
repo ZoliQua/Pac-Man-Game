@@ -4,21 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [1.1.2] — 2026-12-06
+## [1.1.2] — 2026-11-04
 
 ### Changed
 
 - Vendored kit (`src/arcade/`) updated: the registry knows the eleventh arcade game, Texas Hold'em, with its accent colour.
 - README: the Zoltan's Arcade family table lists all eleven games.
 
-## [1.1.1] — 2026-11-22
+## [1.1.1] — 2026-11-01
 
 ### Changed
 
 - Vendored kit (`src/arcade/`) updated: the registry knows the tenth arcade game, Nut Sort, with its accent colour.
 - README: the Zoltan's Arcade family table lists all ten games.
 
-## [1.1.0] — 2026-11-13
+## [1.1.0] — 2026-10-29
 
 ### Changed
 
@@ -26,7 +26,7 @@ All notable changes to this project are documented here. The format follows
   Connect Four — with their accent colours; the duel round-score docs mention Connect Four.
 - README: the Zoltan's Arcade family table lists all nine games.
 
-## [1.0.0] — 2026-10-24
+## [1.0.0] — 2026-10-25
 
 ### Added
 - Shared Zoltan's Arcade kit (`src/arcade/`): unified stats, theme, standalone shell and UI.
