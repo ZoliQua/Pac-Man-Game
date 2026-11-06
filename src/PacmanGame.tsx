@@ -2,11 +2,16 @@ import { useCallback, useMemo, useRef, useState, type CSSProperties } from 'reac
 import {
   clearSession,
   formatClock,
+  formatNumber,
+  gameName,
   GameOverlay,
   KeyHelp,
   SaveBadge,
   StatPanel,
   useArcadeRun,
+  useKitMessages,
+  useLang,
+  useMessages,
   useRestoredSession,
   useRunTimer,
   useSessionAutosave,
@@ -19,6 +24,7 @@ import { IconThemeToggle } from './components/IconThemeToggle';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useIconTheme } from './hooks/useIconTheme';
 import { useKeyboardDirection } from './hooks/useKeyboardDirection';
+import { MESSAGES, type PacmanMessageKey } from './i18n';
 import { TICK_MS } from './logic/constants';
 import { advanceGame, arcadeStatus, createInitialState, settleTransition } from './logic/game';
 import { fromSaved, isSavedPacman, toSaved, type SavedGame } from './logic/persist';
@@ -28,11 +34,12 @@ import styles from './App.module.css';
 /** Bump when SavedGame changes shape; older saves are then discarded. */
 const SESSION_SCHEMA = 1;
 
-const KEYS: [string, string][] = [
-  ['← ↑ → ↓', 'Steer (or WASD)'],
-  ['Space', 'Start / pause'],
-  ['P Esc', 'Pause / resume'],
-  ['R', 'Restart'],
+/** Key-help rows; `null` keys stand for the translated name of the Space bar. */
+const KEYS: [string | null, PacmanMessageKey][] = [
+  ['← ↑ → ↓', 'keySteer'],
+  [null, 'keyStartPause'],
+  ['P Esc', 'keyPauseResume'],
+  ['R', 'keyRestart'],
 ];
 
 /**
@@ -53,6 +60,10 @@ function newRun(direction?: Direction): GameState {
 
 export function PacmanGame(props: ArcadeGameProps = {}) {
   const { embedded = false } = props;
+  const t = useMessages(MESSAGES);
+  const k = useKitMessages();
+  const [lang] = useLang();
+  const num = (n: number) => formatNumber(n, lang);
   const restored = useRestoredSession<SavedGame>('pacman', SESSION_SCHEMA, isSavedPacman);
   const [boot] = useState(() => bootState(restored));
   const [state, setState] = useState<GameState>(boot);
@@ -155,49 +166,54 @@ export function PacmanGame(props: ArcadeGameProps = {}) {
   let overlay: { title: string; message: string; actions: OverlayAction[] } | null = null;
   if (state.status === 'idle') {
     overlay = {
-      title: 'Pac-Man',
-      message:
-        'Eat every dot and dodge the ghosts. Power pellets turn the tables — ghosts eaten in a row score 200, 400, 800, 1600.',
-      actions: [{ label: 'Start', onClick: restart, primary: true, kbd: 'Space' }],
+      title: gameName('pacman', lang),
+      message: t('idleMessage'),
+      actions: [{ label: k('start'), onClick: restart, primary: true, kbd: t('keySpace') }],
     };
   } else if (state.status === 'paused') {
     overlay = welcomeBack
       ? {
-          title: 'Welcome back',
-          message: `Your saved run was restored — score ${state.score}, level ${state.level}, ${formatClock(seconds)} played.`,
+          title: k('welcomeBack'),
+          message: t('welcomeMessage', { score: num(state.score), level: state.level, time: formatClock(seconds) }),
           actions: [
-            { label: 'Continue', onClick: togglePause, primary: true, kbd: 'P' },
-            { label: 'New game', onClick: restart, kbd: 'R' },
+            { label: t('continue'), onClick: togglePause, primary: true, kbd: 'P' },
+            { label: k('newGame'), onClick: restart, kbd: 'R' },
           ],
         }
       : {
-          title: 'Paused',
-          message: 'Your run is autosaved — you can close the tab and continue later.',
+          title: k('paused'),
+          message: t('pausedMessage'),
           actions: [
-            { label: 'Resume', onClick: togglePause, primary: true, kbd: 'P' },
-            { label: 'Restart', onClick: restart, kbd: 'R' },
+            { label: k('resume'), onClick: togglePause, primary: true, kbd: 'P' },
+            { label: k('restart'), onClick: restart, kbd: 'R' },
           ],
         };
   } else if (state.status === 'levelClear') {
-    overlay = { title: `Level ${state.level} cleared!`, message: `Score ${state.score}`, actions: [] };
+    overlay = {
+      title: t('levelCleared', { level: state.level }),
+      message: t('levelClearedMessage', { score: num(state.score) }),
+      actions: [],
+    };
   } else if (state.status === 'gameOver') {
     overlay = {
-      title: 'Game over',
-      message: `Score ${state.score} · Level ${state.level} · Best ${best}${newBest ? ' — new best!' : ''}`,
-      actions: [{ label: 'Play again', onClick: restart, primary: true, kbd: 'R' }],
+      title: k('gameOver'),
+      message:
+        t('gameOverMessage', { score: num(state.score), level: state.level, best: num(best) }) +
+        (newBest ? t('newBestSuffix') : ''),
+      actions: [{ label: t('playAgain'), onClick: restart, primary: true, kbd: 'R' }],
     };
   }
 
   const statusLabel =
-    state.status === 'dying' ? 'Caught!' : state.status === 'levelClear' ? 'Level clear!' : undefined;
+    state.status === 'dying' ? t('statusCaught') : state.status === 'levelClear' ? t('statusLevelClear') : undefined;
 
   return (
     <div className={`arc-game ${styles.game}`} style={{ '--game-color': 'var(--game-pacman)' } as CSSProperties}>
       {!embedded && (
         <header className="arc-game__head">
           <div>
-            <h1 className="arc-game__title">Pac-Man</h1>
-            <p className="arc-game__sub">Gobble the dots — and the ghosts, when they turn blue.</p>
+            <h1 className="arc-game__title">{gameName('pacman', lang)}</h1>
+            <p className="arc-game__sub">{t('subtitle')}</p>
           </div>
         </header>
       )}
@@ -206,29 +222,29 @@ export function PacmanGame(props: ArcadeGameProps = {}) {
         status={status}
         statusLabel={statusLabel}
         items={[
-          { label: 'Score', value: state.score },
-          { label: 'Best', value: best, highlight: newBest },
-          { label: 'Lives', value: state.lives },
-          { label: 'Level', value: state.level },
-          { label: 'Time', value: formatClock(seconds) },
+          { label: k('score'), value: num(state.score) },
+          { label: k('best'), value: num(best), highlight: newBest },
+          { label: t('lives'), value: state.lives },
+          { label: k('level'), value: state.level },
+          { label: k('time'), value: formatClock(seconds) },
         ]}
       />
 
       <div className={styles.layout}>
         <div className={`arc-game__board ${styles.boardWrap}`}>
-          <GameBoard state={state} theme={theme} />
+          <GameBoard state={state} theme={theme} label={t('maze')} />
           {overlay && <GameOverlay {...overlay} />}
         </div>
 
         <aside className={styles.side}>
           <section className="arc-panel">
-            <h2 className="arc-panel__title">Game</h2>
+            <h2 className="arc-panel__title">{t('panelGame')}</h2>
             <div className={styles.buttons}>
               <button type="button" className="arc-btn arc-btn--primary" onClick={primary} disabled={transition}>
-                {status === 'running' ? 'Pause' : status === 'paused' ? 'Resume' : 'Start'}
+                {status === 'running' ? k('pause') : status === 'paused' ? k('resume') : k('start')}
               </button>
               <button type="button" className="arc-btn" onClick={restart} disabled={state.status === 'idle'}>
-                Restart
+                {k('restart')}
               </button>
             </div>
             <div className={styles.save}>
@@ -237,13 +253,18 @@ export function PacmanGame(props: ArcadeGameProps = {}) {
           </section>
 
           <section className="arc-panel">
-            <h2 className="arc-panel__title">Settings</h2>
-            <IconThemeToggle theme={theme} onChange={setTheme} />
+            <h2 className="arc-panel__title">{t('panelSettings')}</h2>
+            <IconThemeToggle
+              theme={theme}
+              onChange={setTheme}
+              label={t('iconTheme')}
+              optionLabels={{ normal: t('themeNormal'), fog: t('themeFog') }}
+            />
           </section>
 
           <section className="arc-panel">
-            <h2 className="arc-panel__title">Keys</h2>
-            <KeyHelp rows={KEYS} />
+            <h2 className="arc-panel__title">{t('panelKeys')}</h2>
+            <KeyHelp rows={KEYS.map(([keys, action]) => [keys ?? t('keySpace'), t(action)])} />
           </section>
         </aside>
       </div>

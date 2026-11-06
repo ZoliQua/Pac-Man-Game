@@ -13,6 +13,8 @@ type Props = {
   theme?: IconTheme;
   /** `mini` drops the ARIA grid roles (the demo is decorative). */
   mini?: boolean;
+  /** Accessible name of the maze grid. */
+  label?: string;
 };
 
 type CellKind = 'wall' | 'pellet' | 'power' | 'door' | 'empty';
@@ -27,7 +29,7 @@ const { walls, doorTiles, cols, rows } = PARSED_MAZE;
  * identity when something is eaten, so most ticks skip re-rendering 868 cells.
  * Cell size comes from the `--cell` custom property set by GameBoard.
  */
-export const Maze = memo(function Maze({ pellets, powerPellets, theme = 'normal', mini = false }: Props) {
+export const Maze = memo(function Maze({ pellets, powerPellets, theme = 'normal', mini = false, label = 'Pac-Man maze' }: Props) {
   const spec = THEMES[theme];
 
   const cells = useMemo(() => {
@@ -52,7 +54,7 @@ export const Maze = memo(function Maze({ pellets, powerPellets, theme = 'normal'
     <div
       className={`${styles.maze} ${styles[`theme-${theme}`]}`}
       role={mini ? undefined : 'grid'}
-      aria-label={mini ? undefined : 'Pac-Man maze'}
+      aria-label={mini ? undefined : label}
       style={{
         gridTemplateColumns: `repeat(${cols}, var(--cell))`,
         gridTemplateRows: `repeat(${rows}, var(--cell))`,
