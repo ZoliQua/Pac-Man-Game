@@ -6,15 +6,15 @@ type Props = {
   onChange: (theme: IconTheme) => void;
   /** Translated field label ("Icon theme"). */
   label: string;
-  /** Translated name of each option ("Normal", "Fog"). */
+  /** Translated name of each option ("Normal", "Fog", "Dental"). */
   optionLabels: Record<IconTheme, string>;
 };
 
-const OPTIONS: readonly IconTheme[] = ['normal', 'fog'];
+const OPTIONS: readonly IconTheme[] = ['normal', 'fog', 'dental'];
 
 /**
- * Switches the icon set between `normal` (classic arcade) and `fog` (muted,
- * spooky reskin). Cosmetic only — it can be flipped at any time, including
+ * Switches the icon set between `normal` (classic arcade), `fog` (muted,
+ * spooky reskin) and `dental` (the shared arcade dental mode). Cosmetic only — it can be flipped at any time, including
  * mid-game, without resetting the board.
  */
 export function IconThemeToggle({ theme, onChange, label, optionLabels }: Props) {

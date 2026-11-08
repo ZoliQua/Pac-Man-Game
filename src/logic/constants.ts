@@ -1,4 +1,4 @@
-import type { GhostName, IconTheme, Vec } from './types';
+import type { BaseIconTheme, GhostName, IconTheme, Vec } from './types';
 
 /** Milliseconds per game tick (one tile step per entity). */
 export const TICK_MS = 150;
@@ -23,7 +23,7 @@ export const POINTS = {
  * stylesheets can add theme-specific glows / filters beyond the colour tokens.
  */
 export type ThemeSpec = {
-  /** Stable identifier, used as a CSS class hook (`theme-normal` / `theme-fog`). */
+  /** Stable identifier, used as a CSS class hook (`theme-normal` / `theme-fog` / `theme-dental`). */
   key: IconTheme;
   /** CSS colour for wall tiles. */
   wall: string;
@@ -104,9 +104,33 @@ export const THEMES: Record<IconTheme, ThemeSpec> = {
     pupil: '#1a2530',
     entityOpacity: 0.82,
   },
+  // Dental: a clinic-teal maze, toothpaste dots, toothbrush power pellets and
+  // germ ghosts (shapes drawn by the components; these are the colour tokens).
+  dental: {
+    key: 'dental',
+    wall: '#0f5f55',
+    wallGlow: '#5fe0c3',
+    pellet: '#e9f6ff',
+    powerPellet: '#6b8cff',
+    powerGlow: '#9fe8d6',
+    background: '#03161a',
+    door: '#bfeee2',
+    pacman: '#f7f8fb',
+    ghosts: {
+      blinky: '#ef4c55',
+      pinky: '#e57bd8',
+      inky: '#3fb6e0',
+      clyde: '#f0a43a',
+    },
+    frightened: '#8fa6ff',
+    frightenedFlash: '#ffffff',
+    eye: '#ffffff',
+    pupil: '#1b1d27',
+    entityOpacity: 1,
+  },
 };
 
-export const DEFAULT_THEME: IconTheme = 'normal';
+export const DEFAULT_THEME: BaseIconTheme = 'normal';
 
 /** Seconds → ticks (rounded). 1 tick = TICK_MS. */
 const secs = (s: number): number => Math.round((s * 1000) / TICK_MS);

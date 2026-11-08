@@ -14,7 +14,14 @@ export type GameStatus =
   | 'levelClear'
   | 'gameOver';
 
-export type IconTheme = 'normal' | 'fog';
+/**
+ * Icon theme as drawn. `dental` is not stored per game: it mirrors the shared
+ * arcade dental mode (`arcade.dental`), so only `BaseIconTheme` is persisted.
+ */
+export type IconTheme = 'normal' | 'fog' | 'dental';
+
+/** The per-game stored choice (`pacman.iconTheme`): the theme used while dental mode is off. */
+export type BaseIconTheme = Exclude<IconTheme, 'dental'>;
 
 export type Ghost = {
   name: GhostName;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ArcadeDemoProps } from '../arcade';
+import { useDental, type ArcadeDemoProps } from '../arcade';
 import { GameBoard } from '../components/GameBoard';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { demoStep } from '../logic/autopilot';
@@ -17,6 +17,7 @@ const freshDemo = (): GameState => createInitialState({ status: 'running' });
  */
 export function PacmanDemo({ active = true }: ArcadeDemoProps) {
   const [state, setState] = useState(freshDemo);
+  const [dental] = useDental();
 
   const tick = useCallback(() => setState(demoStep), []);
   useGameLoop(active && state.status !== 'gameOver', DEMO_TICK_MS, tick);
@@ -29,7 +30,7 @@ export function PacmanDemo({ active = true }: ArcadeDemoProps) {
 
   return (
     <div className="arc-demo">
-      <GameBoard state={state} theme="normal" variant="mini" />
+      <GameBoard state={state} theme={dental ? 'dental' : 'normal'} variant="mini" />
     </div>
   );
 }

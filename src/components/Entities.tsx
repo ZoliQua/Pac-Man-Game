@@ -1,3 +1,4 @@
+import { Germ, SmileTooth } from '../arcade';
 import { FRIGHTENED_FLASH_TICKS, THEMES } from '../logic/constants';
 import type { Direction, Ghost, IconTheme, Vec } from '../logic/types';
 import styles from './Entities.module.css';
@@ -28,6 +29,36 @@ const PUPIL_SHIFT: Record<Direction, { x: number; y: number }> = {
   NONE: { x: 0, y: 0 },
 };
 
+const SPIKES = Array.from({ length: 8 }, (_, i) => (i * Math.PI) / 4);
+
+/**
+ * Frightened germ in dental mode: the same spiky silhouette as `Germ`, but an
+ * empty outlined body with a wobbly worried mouth — told apart by shape, not
+ * only by colour.
+ */
+function HollowGerm({ color }: { color: string }) {
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true" focusable="false">
+      {SPIKES.map((a) => (
+        <line
+          key={a}
+          x1={(50 + Math.cos(a) * 30).toFixed(1)}
+          y1={(50 + Math.sin(a) * 30).toFixed(1)}
+          x2={(50 + Math.cos(a) * 44).toFixed(1)}
+          y2={(50 + Math.sin(a) * 44).toFixed(1)}
+          stroke={color}
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+      ))}
+      <circle cx="50" cy="50" r="26" fill="none" stroke={color} strokeWidth="7" strokeDasharray="10 6" />
+      <circle cx="41" cy="44" r="4" fill={color} />
+      <circle cx="59" cy="44" r="4" fill={color} />
+      <path d="M37 62l6-5 7 5 7-5 6 5" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /**
  * Entity overlay (positions via the `--cell` custom property from GameBoard). Renders Pac-Man (animated mouth, oriented by direction) plus
  * the four ghosts, absolutely positioned over the maze grid by tile coordinate.
@@ -36,6 +67,8 @@ const PUPIL_SHIFT: Record<Direction, { x: number; y: number }> = {
  *   - frightened    → themed "frightened" colour, flashing in the final
  *                     FRIGHTENED_FLASH_TICKS to warn the window is closing
  *   - eaten         → eyes only (no body)
+ * Dental theme: Pac-Man is a smiling tooth (mirrored when heading left), ghosts
+ * are germs (frightened: hollow dashed germs), eaten ghosts keep the eyes.
  * No gameplay state is read here beyond what is needed to draw — themes are
  * cosmetic only.
  */
@@ -48,6 +81,7 @@ export function Entities({
   const spec = THEMES[theme];
   const flashing =
     frightenedTimer > 0 && frightenedTimer <= FRIGHTENED_FLASH_TICKS;
+  const dental = theme === 'dental';
 
   return (
     <div
@@ -56,14 +90,24 @@ export function Entities({
       style={{ ['--entity-opacity' as string]: String(spec.entityOpacity) }}
     >
       <div
-        className={styles.pacman}
+        className={dental ? `${styles.pacman} ${styles.pacmanTooth}` : styles.pacman}
+        data-testid="pacman-player"
         style={{
           ['--x' as string]: pacman.pos.x,
           ['--y' as string]: pacman.pos.y,
-          ['--rot' as string]: `${DIR_ROTATION[pacman.dir]}deg`,
+          ['--rot' as string]: dental ? '0deg' : `${DIR_ROTATION[pacman.dir]}deg`,
           ['--pacman-color' as string]: spec.pacman,
         }}
-      />
+      >
+        {dental && (
+          <span
+            className={`${styles.art} ${pacman.dir === 'LEFT' ? styles.mirrored : ''}`}
+            data-testid="pacman-player-tooth"
+          >
+            <SmileTooth size="100%" />
+          </span>
+        )}
+      </div>
       {ghosts.map((g) => {
         const isFrightened = g.mode === 'frightened';
         const isEaten = g.mode === 'eaten';
@@ -80,6 +124,7 @@ export function Entities({
               styles.ghost,
               isFrightened ? styles.frightened : '',
               isEaten ? styles.eaten : '',
+              dental ? styles.ghostGerm : '',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -91,7 +136,17 @@ export function Entities({
               ['--pupil-color' as string]: spec.pupil,
             }}
           >
-            {!isFrightened && (
+            {dental && isFrightened && (
+              <span className={styles.art} data-testid="pacman-ghost-hollow">
+                <HollowGerm color={body} />
+              </span>
+            )}
+            {dental && !isFrightened && !isEaten && (
+              <span className={styles.art} data-testid="pacman-ghost-germ">
+                <Germ size="100%" fill={body} />
+              </span>
+            )}
+            {!isFrightened && !(dental && !isEaten) && (
               <span className={styles.eyes}>
                 <span className={styles.eye}>
                   <span

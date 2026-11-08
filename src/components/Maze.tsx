@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { Toothbrush } from '../arcade';
 import { THEMES } from '../logic/constants';
 import { key } from '../logic/grid';
 import { PARSED_MAZE } from '../logic/maze';
@@ -31,6 +32,7 @@ const { walls, doorTiles, cols, rows } = PARSED_MAZE;
  */
 export const Maze = memo(function Maze({ pellets, powerPellets, theme = 'normal', mini = false, label = 'Pac-Man maze' }: Props) {
   const spec = THEMES[theme];
+  const dental = theme === 'dental';
 
   const cells = useMemo(() => {
     const out: CellKind[] = [];
@@ -69,8 +71,14 @@ export const Maze = memo(function Maze({ pellets, powerPellets, theme = 'normal'
     >
       {cells.map((kind, i) => (
         <div key={i} className={`${styles.cell} ${styles[kind]}`} role={mini ? undefined : 'gridcell'}>
-          {kind === 'pellet' ? <span className={styles.dot} /> : null}
-          {kind === 'power' ? <span className={styles.powerDot} /> : null}
+          {kind === 'pellet' && dental ? <span className={styles.pasteDot} data-testid="pacman-dot-paste" /> : null}
+          {kind === 'power' && dental ? (
+            <span className={styles.brush} data-testid="pacman-power-brush">
+              <Toothbrush size="100%" />
+            </span>
+          ) : null}
+          {kind === 'pellet' && !dental ? <span className={styles.dot} /> : null}
+          {kind === 'power' && !dental ? <span className={styles.powerDot} /> : null}
         </div>
       ))}
     </div>

@@ -16,7 +16,11 @@ type Props = {
 export function GameBoard({ state, theme, variant = 'full', label }: Props) {
   const mini = variant === 'mini';
   return (
-    <div className={`${styles.board} ${mini ? styles.mini : ''}`} aria-hidden={mini ? true : undefined}>
+    <div
+      className={`${styles.board} ${mini ? styles.mini : ''}`}
+      aria-hidden={mini ? true : undefined}
+      data-dental={theme === 'dental'}
+    >
       <Maze pellets={state.pellets} powerPellets={state.powerPellets} theme={theme} mini={mini} label={label} />
       <Entities
         pacman={state.pacman}

@@ -9,6 +9,7 @@ import {
   SaveBadge,
   StatPanel,
   useArcadeRun,
+  useDental,
   useKitMessages,
   useLang,
   useMessages,
@@ -28,7 +29,7 @@ import { MESSAGES, type PacmanMessageKey } from './i18n';
 import { TICK_MS } from './logic/constants';
 import { advanceGame, arcadeStatus, createInitialState, settleTransition } from './logic/game';
 import { fromSaved, isSavedPacman, toSaved, type SavedGame } from './logic/persist';
-import type { Direction, GameState } from './logic/types';
+import type { Direction, GameState, IconTheme } from './logic/types';
 import styles from './App.module.css';
 
 /** Bump when SavedGame changes shape; older saves are then discarded. */
@@ -69,7 +70,22 @@ export function PacmanGame(props: ArcadeGameProps = {}) {
   const [state, setState] = useState<GameState>(boot);
   const [runId, setRunId] = useState(0);
   const [welcomeBack, setWelcomeBack] = useState(boot.status === 'paused');
-  const { theme, setTheme } = useIconTheme();
+  const { theme: baseTheme, setTheme: setBaseTheme } = useIconTheme();
+  // The Dental option is the shared arcade dental mode; Normal / Fog stay the per-game choice
+  // and come back when dental mode is switched off anywhere.
+  const [dental, setDental] = useDental();
+  const theme: IconTheme = dental ? 'dental' : baseTheme;
+  const setTheme = useCallback(
+    (next: IconTheme) => {
+      if (next === 'dental') {
+        setDental(true);
+        return;
+      }
+      setBaseTheme(next);
+      setDental(false);
+    },
+    [setBaseTheme, setDental],
+  );
 
   const status = arcadeStatus(state.status);
   const seconds = useRunTimer(status === 'running', runId, runId === 0 ? (restored?.seconds ?? 0) : 0);
@@ -258,7 +274,7 @@ export function PacmanGame(props: ArcadeGameProps = {}) {
               theme={theme}
               onChange={setTheme}
               label={t('iconTheme')}
-              optionLabels={{ normal: t('themeNormal'), fog: t('themeFog') }}
+              optionLabels={{ normal: t('themeNormal'), fog: t('themeFog'), dental: t('themeDental') }}
             />
           </section>
 
