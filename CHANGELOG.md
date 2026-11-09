@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-11-09
+
+### Added
+
+- Three languages: English, Hungarian and German, switchable in the top bar / settings and by `?lang=en|hu|de`; the choice is shared across the arcade (`arcade.lang`).
+- Dental mode (off by default, shared `arcade.dental`, `?dental=1`): a third icon theme: Pac-Man is a smiling tooth, the dots are toothpaste, the power pellet a toothbrush and the ghosts bacteria. Presentation only: rules, scores, stats and saves are unchanged.
+
+### Changed
+
+- Numbers use the locale's digit grouping.
+- Links now point to https://dulzoltan.hu/arcade/ (the arcade moved to its new domain).
+
 ## [1.1.2] — 2026-11-04
 
 ### Changed

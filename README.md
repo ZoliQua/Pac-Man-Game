@@ -52,11 +52,13 @@ Every game is a standalone repo that also plugs into the portal. They share one 
 - 👻 **Four ghosts with real AI** — Blinky, Pinky, Inky and Clyde, each with their own chase target and a classic scatter/chase schedule
 - 😱 **Frightened & eaten modes** — power pellets turn the ghosts blue (eat them for 200 → 400 → 800 → 1600); eaten ghosts become eyes that race home and respawn
 - ❤️ **Lives & levels** — 3 lives; clearing the maze starts the next level (score and lives carry over, the frightened window shrinks)
-- 🎨 **Two icon themes** — **normal** (classic arcade) or **fog** (a muted, spooky reskin), switchable any time, even mid-game; cosmetic only
+- 🎨 **Icon themes** — **normal** (classic arcade), **fog** (a muted, spooky reskin) or **dental** (see below), switchable any time, even mid-game; cosmetic only
 - 💾 **Autosave & resume** — close the tab mid-run and pick up where you left off, ghosts and all
 - 🏆 **Unified arcade stats** — best score, plays, total time, shared with the portal
 - ⏱️ **Pause-aware run timer**
 - 🌗 **Dark / light theme** shared with every arcade game (press **T**)
+- 🌍 **Three languages** — English, Hungarian and German; switch in the top bar or in the settings (also `?lang=en|hu|de` for link hand-off); numbers follow the locale's grouping
+- 🦷 **Dental mode** — a „Fogas mód” / "Dental mode" / „Zahnmodus” toggle in the settings, off by default (or `?dental=1`), shared across the whole arcade: a third icon theme: Pac-Man is a smiling tooth, the dots are toothpaste, the power pellet a toothbrush and the ghosts bacteria; presentation only
 - 🤖 **Attract-mode demo** (`<PacmanDemo />`) — the real engine driven by a ghost-aware BFS autopilot, shown on the portal's landing page
 - ⌨️ **Keyboard-first**; hotkeys are ignored while you type in a form field
 - 🧪 **Tested** — pure-logic unit tests plus component tests with Vitest + Testing Library
