@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-11-14
+
+### Added
+
+- Rules: a „Szabályok” / "Rules" / „Regeln” button above the maze opens the rules in the game (goal, how to play, rules, scoring, dental mode and — on touch devices — on mobile) with a diagram of a power pellet turning a ghost into a frightened ghost. Opening it pauses the run; the scoring numbers come from the same constants as the game. R stays the restart key, so the button has no hotkey.
+- Finish early: a „Befejezés” / "Finish" / „Beenden” button ends a run after an in-page confirm; the score shown in the Score panel goes on the leaderboard (even 0), the game-over card says „Idő előtt befejezve” / "Finished early" and the save is dropped. The game holds still while the confirm is open; Cancel changes nothing.
+- Touch controls: swipe on the maze or use the on-screen arrow pad (with a start/pause button in the middle); turns are queued until they are possible. The maze never scrolls or zooms the page under a finger, and the Controls panel shows the touch rows on phones.
+- Full screen: a full-screen button for the game; on iPhone the game covers the page instead. Escape in that mode only pauses, never resumes.
+
+### Changed
+
+- The maze shrinks to fit 360–430 px wide phones (portrait) together with the stats, buttons and pad; `viewport-fit=cover` for the iPhone safe areas.
+- README in three languages (English, German, Hungarian); the family table lists all fifteen games, including Snapszer.
+
 ## [1.2.1] — 2026-11-14
 
 ### Changed

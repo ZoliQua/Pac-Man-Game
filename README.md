@@ -1,7 +1,9 @@
 # 🟡 Pac-Man
 
-A minimal, type-safe Pac-Man built with **React 18**, **Vite** and **TypeScript** — keyboard-first, grid-based DOM, no canvas, no game engine.
-Runs on its own **and** as one of the fourteen games of **[Zoltan's Arcade](https://github.com/ZoliQua/Arcade-Game-Center)**.
+**English** · [Deutsch](README.de.md) · [Magyar](README.hu.md)
+
+A minimal, type-safe Pac-Man built with **React 18**, **Vite** and **TypeScript** — play it with the keyboard or on a phone, grid-based DOM, no canvas, no game engine.
+Runs on its own **and** as one of the fifteen games of **[Zoltan's Arcade](https://github.com/ZoliQua/Arcade-Game-Center)**.
 
 [![CI](https://github.com/ZoliQua/Pac-Man-Game/actions/workflows/ci.yml/badge.svg)](https://github.com/ZoliQua/Pac-Man-Game/actions/workflows/ci.yml)
 ![license](https://img.shields.io/badge/license-MIT-green)
@@ -48,6 +50,7 @@ Every game is a standalone repo that also plugs into the portal. They share one 
 | 💣 Minesweeper | [Minesweeper-Game](https://github.com/ZoliQua/Minesweeper-Game) | Logic |
 | ♠️ Solitaire | [Solitaire-Game](https://github.com/ZoliQua/Solitaire-Game) | Cards |
 | 🎴 Ulti | [Ulti-Game](https://github.com/ZoliQua/Ulti-Game) | Cards |
+| 🌰 Snapszer | [Snapszer-Game](https://github.com/ZoliQua/Snapszer-Game) | Cards |
 
 ## ✨ Features
 
@@ -62,8 +65,12 @@ Every game is a standalone repo that also plugs into the portal. They share one 
 - 🌗 **Dark / light theme** shared with every arcade game (press **T**)
 - 🌍 **Three languages** — English, Hungarian and German; switch in the top bar or in the settings (also `?lang=en|hu|de` for link hand-off); numbers follow the locale's grouping
 - 🦷 **Dental mode** — a „Fogas mód” / "Dental mode" / „Zahnmodus” toggle in the settings, off by default (or `?dental=1`), shared across the whole arcade: a third icon theme: Pac-Man is a smiling tooth, the dots are toothpaste, the power pellet a toothbrush and the ghosts bacteria; presentation only
+- 📖 **Rules** — a Rules button opens the rules in the game (goal, how to play, rules, scoring, dental mode, on a phone) with a picture of what a power pellet does to a ghost; opening it pauses the run
+- 🏁 **Finish early** — end a run whenever you like; after a confirm the score shown in the Score panel goes on the leaderboard
+- 📱 **Touch controls** — swipe on the maze or use the on-screen arrow pad; turns are queued until they are possible
+- ⛶ **Full screen** — the maze fills the screen; on iPhone the game covers the page instead (Safari has no full-screen API)
 - 🤖 **Attract-mode demo** (`<PacmanDemo />`) — the real engine driven by a ghost-aware BFS autopilot, shown on the portal's landing page
-- ⌨️ **Keyboard-first**; hotkeys are ignored while you type in a form field
+- ⌨️ **Keyboard or touch**; hotkeys are ignored while you type in a form field
 - 🧪 **Tested** — pure-logic unit tests plus component tests with Vitest + Testing Library
 
 ## 🚀 Quick start
@@ -91,6 +98,16 @@ Production build: `npm run build && npm run preview`. The build uses relative as
 
 Input only buffers a *desired* direction; the logic applies the turn at the first tile where it is legal, and Pac-Man stops dead at walls.
 
+Above the maze sit three buttons: **Rules** (opens the rules and pauses the run; R stays the restart key, so the
+button has no hotkey), **Finish** (ends the run early after a confirm — the shown score is ranked) and **Full screen**.
+
+### 📱 On a phone
+
+Swipe on the maze to steer, or use the arrow pad below it; a turn you ask for early waits for the next opening, just
+like the arrow keys. The middle pad button starts, pauses and resumes. The maze itself never scrolls or zooms the page
+under your finger. **Full screen** gives the whole screen to the game; on iPhone, adding the page to the Home Screen
+(Share → Add to Home Screen) also hides the browser bars.
+
 ## 🎯 Scoring & stats
 
 | Event | Points |
@@ -101,7 +118,8 @@ Input only buffers a *desired* direction; the logic applies the turn at the firs
 
 The ghost chain resets on each power pellet, not per level. The frightened window lasts 6 s on level 1 and
 shrinks by about 0.5 s per level (minimum 1 s). Levels repeat forever, so every run ends when the last life is lost
-(outcome `over`).
+(outcome `over`) — or when you press **Finish**: then the score shown at that moment is ranked (outcome `finished`,
+even at 0 points) and the game-over card says *Finished early*.
 
 When a run ends the kit records it once in `localStorage` under `arcade.stats.pacman`
 (`best`, `plays`, `wins`, `totalScore`, `totalSeconds`, `lastScore`, `lastPlayedAt`).
@@ -208,6 +226,7 @@ src/
   hooks/               useGameLoop, useKeyboardDirection, useIconTheme
   components/          GameBoard (full + mini) = Maze + Entities, IconThemeToggle
   demo/PacmanDemo.tsx  landing-page attract mode
+  rules.tsx            Rules dialog sections + the power-pellet diagram
   PacmanGame.tsx       the embeddable game (ArcadeGameProps)
   App.tsx              standalone page: <ArcadeShell><PacmanGame/></ArcadeShell>
   main.tsx             entry; loads the shared arcade.css once
