@@ -39,6 +39,7 @@
 /* Phones held upright: also leave room for the stats, the button row and the touch pad below the maze. */
 @media (max-width: 480px) and (pointer: coarse) {
   .board:not(.mini) {
+    /* Deliberate pair: browsers without dvh keep the vh line; dvh (iOS bars shown/hidden) wins where supported. */
     --cell: min(13px, calc((100vw - 44px) / 28), calc((100vh - 500px) / 31));
     --cell: min(13px, calc((100vw - 44px) / 28), max(9px, calc((100dvh - 500px) / 31)));
   }

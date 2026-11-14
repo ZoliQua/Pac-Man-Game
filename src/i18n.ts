@@ -41,7 +41,7 @@ const en = {
   rulesGhosts:
     'Each ghost hunts in its own way, and from time to time they all scatter to their corners. The side tunnel takes you across the maze.',
   rulesPower:
-    'A power pellet frightens the ghosts for a short while: their eyes disappear, slow down and run from you — now you can eat them. They flash shortly before it ends.',
+    'A power pellet frightens the ghosts for a short while: the ghosts lose their eyes, slow down and run from you — now you can eat them. They flash shortly before it ends.',
   rulesLevelClear: 'When the last dot is gone the level is cleared; your score and lives carry over.',
   rulesScorePellet: 'Dot: {points} points',
   rulesScorePower: 'Power pellet: {points} points',
@@ -109,7 +109,7 @@ export const MESSAGES: Messages<PacmanMessageKey> = {
     rulesGhosts:
       'Minden szellem a maga módján vadászik rád, és időnként mind a sarkukba húzódnak. Az oldalsó alagúton átjutsz a labirintus másik oldalára.',
     rulesPower:
-      'Az erőpirula egy rövid időre megijeszti a szellemeket: eltűnik a szemük, lelassulnak és menekülnek előled – ilyenkor megeheted őket. Mielőtt lejár, villognak.',
+      'Az erőpirula egy rövid időre megijeszti a szellemeket: a szellemek elveszítik a szemüket, lelassulnak és menekülnek előled – ilyenkor megeheted őket. Mielőtt lejár, villognak.',
     rulesLevelClear: 'Ha az utolsó pötty is elfogyott, a szint teljesítve; a pontjaid és az életeid megmaradnak.',
     rulesScorePellet: 'Pötty: {points} pont',
     rulesScorePower: 'Erőpirula: {points} pont',
@@ -172,7 +172,7 @@ export const MESSAGES: Messages<PacmanMessageKey> = {
     rulesGhosts:
       'Jeder Geist jagt dich auf seine eigene Art, und ab und zu ziehen sich alle in ihre Ecken zurück. Durch den Seitentunnel kommst du auf die andere Seite.',
     rulesPower:
-      'Eine Kraftpille erschreckt die Geister für kurze Zeit: Ihre Augen verschwinden, werden langsamer und fliehen vor dir – jetzt kannst du sie fressen. Kurz vor dem Ende blinken sie.',
+      'Eine Kraftpille erschreckt die Geister für kurze Zeit: Die Geister verlieren ihre Augen, werden langsamer und fliehen vor dir – jetzt kannst du sie fressen. Kurz vor dem Ende blinken sie.',
     rulesLevelClear: 'Ist der letzte Punkt gefressen, ist das Level geschafft; Punkte und Leben bleiben dir erhalten.',
     rulesScorePellet: 'Punkt: {points} Punkte',
     rulesScorePower: 'Kraftpille: {points} Punkte',

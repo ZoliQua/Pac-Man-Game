@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { applyDental, applyLang, formatNumber, KIT_MESSAGES } from './arcade';
+import { applyDental, applyLang, formatNumber, interpolate, KIT_MESSAGES } from './arcade';
 import { MESSAGES } from './i18n';
 import { POINTS, START_LIVES, TICK_MS } from './logic/constants';
 import { PacmanGame } from './PacmanGame';
@@ -95,13 +95,19 @@ describe('Pac-Man rules', () => {
     expect(section('mobile').textContent).toContain(KIT_MESSAGES.hu.iosHomeScreenTip);
   });
 
-  it('shows every scoring number from the scoring constants', () => {
+  it.each(['hu', 'de'] as const)('scoring lists the full sentences with the real point values (%s)', (lang) => {
+    act(() => applyLang(lang));
     render(<PacmanGame />);
-    fireEvent.click(rulesButton());
-    const text = section('scoring').textContent ?? '';
-    for (const n of [POINTS.pellet, POINTS.power, ...POINTS.ghostChain]) {
-      expect(text).toContain(formatNumber(n, 'hu'));
-    }
+    fireEvent.click(screen.getByRole('button', { name: KIT_MESSAGES[lang].rulesButton }));
+    const scoring = document.querySelector('.arc-rules__section--scoring') as HTMLElement;
+    const items = Array.from(scoring.querySelectorAll('li')).map((li) => li.textContent);
+    const num = (n: number) => formatNumber(n, lang);
+    const m = MESSAGES[lang];
+    expect(items).toEqual([
+      interpolate(m.rulesScorePellet, { points: num(POINTS.pellet) }),
+      interpolate(m.rulesScorePower, { points: num(POINTS.power) }),
+      interpolate(m.rulesScoreChain, { chain: POINTS.ghostChain.map(num).join(' → ') }),
+    ]);
   });
 
   it('draws the power-pellet diagram as a labelled picture, also in dental mode', () => {
