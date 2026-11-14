@@ -36,7 +36,7 @@ const SPIKES = Array.from({ length: 8 }, (_, i) => (i * Math.PI) / 4);
  * empty outlined body with a wobbly worried mouth — told apart by shape, not
  * only by colour.
  */
-function HollowGerm({ color }: { color: string }) {
+export function HollowGerm({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true" focusable="false">
       {SPIKES.map((a) => (

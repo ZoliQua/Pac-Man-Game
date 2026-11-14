@@ -39,3 +39,53 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Rules · Finish · Full screen, above the maze so they stay in reach on a phone. */
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .layout {
+    gap: 12px;
+  }
+
+  /* Phones: one compact row; full screen keeps its icon (the word stays as tooltip and accessible name). */
+  .strip {
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .strip > :global(.arc-btn) {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .strip > :global(.arc-fs__btn) {
+    flex: none;
+    min-width: 44px;
+  }
+
+  .strip > :global(.arc-fs__btn) span {
+    display: none;
+  }
+
+  .game :global(.arc-game__sub) {
+    display: none;
+  }
+}

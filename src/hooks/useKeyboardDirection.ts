@@ -25,6 +25,8 @@ export type KeyboardDirectionHandlers = {
   onPrimary?: () => void;
   /** P / Esc. */
   onTogglePause?: () => void;
+  /** Esc only; when set it replaces `onTogglePause` for Escape (e.g. pause-only in full screen). */
+  onEscape?: () => void;
   onRestart?: () => void;
 };
 
@@ -53,6 +55,12 @@ export function useKeyboardDirection(handlers: KeyboardDirectionHandlers): void 
       if ((event.key === ' ' || event.key === 'Enter') && h.onPrimary) {
         event.preventDefault();
         h.onPrimary();
+        return;
+      }
+
+      if (event.key === 'Escape' && h.onEscape) {
+        event.preventDefault();
+        h.onEscape();
         return;
       }
 

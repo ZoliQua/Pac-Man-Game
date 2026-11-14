@@ -28,3 +28,18 @@
     --cell: 12px;
   }
 }
+
+/* Phones: the 28 columns fill the width (16 px gutters + board frame) without horizontal scroll. */
+@media (max-width: 480px) {
+  .board:not(.mini) {
+    --cell: min(13px, calc((100vw - 44px) / 28));
+  }
+}
+
+/* Phones held upright: also leave room for the stats, the button row and the touch pad below the maze. */
+@media (max-width: 480px) and (pointer: coarse) {
+  .board:not(.mini) {
+    --cell: min(13px, calc((100vw - 44px) / 28), calc((100vh - 500px) / 31));
+    --cell: min(13px, calc((100vw - 44px) / 28), max(9px, calc((100dvh - 500px) / 31)));
+  }
+}

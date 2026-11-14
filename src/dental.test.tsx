@@ -40,7 +40,7 @@ describe('Pac-Man dental mode', () => {
     expect(container.querySelector('[data-testid="pacman-player-tooth"]')).toBeNull();
     expect(container.querySelector('[data-testid="pacman-ghost-germ"]')).toBeNull();
     expect(container.querySelector('[data-testid="pacman-dot-paste"]')).toBeNull();
-    expect(container.querySelector('svg')).toBeNull();
+    expect(boardRoot(container).querySelector('svg')).toBeNull();
     expect(pressed('Normal')).toBe('true');
   });
 

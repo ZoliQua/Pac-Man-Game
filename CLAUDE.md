@@ -18,11 +18,11 @@
 - **Maze**: fixed 28 columns × 31 rows, encoded as `MAZE: string[]` in `src/logic/maze.ts` and parsed at load.
 - **Movement**: tile-stepped — one tick = each entity advances by at most one tile. `TICK_MS = 150`.
 - **Rendering**: grid-based DOM (CSS grid). Tile size is the `--cell` CSS custom property set in `GameBoard.module.css` (20px default, smaller on short/narrow screens, 5.5px in the demo). No canvas.
-- **Controls**: arrow keys + WASD to steer (a direction starts a new game), **Space/Enter** start/pause, **P/Esc** pause/resume, **R** restart. **T** is reserved for the arcade theme toggle. Keyboard only; every handler starts with `shouldIgnoreKey`.
+- **Controls**: arrow keys + WASD to steer (a direction starts a new game), **Space/Enter** start/pause, **P/Esc** pause/resume (Esc only pauses while the CSS full-screen mode is on), **R** restart (so the kit Rules button runs with `hotkey={false}`). **T** is reserved for the arcade theme toggle. Every key handler starts with `shouldIgnoreKey`. Touch: swipe on the maze (`useSwipe`, `.arc-board-touch`) or the kit `TouchPad` d-pad (centre = start/pause); turns are buffered like keys. Above the maze: Rules, Finish (ranks the shown score, outcome `finished`) and Full screen.
 - **Icon themes**: the picker offers Normal / Fog / Dental. `normal` (classic arcade) and `fog` (muted/spooky reskin) are the stored `IconTheme` values; **Dental** is derived from the shared `arcade.dental` preference (choosing it turns dental mode on, choosing Normal or Fog turns it off, turning it on elsewhere selects it here). Cosmetic only — switchable any time, including mid-game, with no rule change.
 - **localStorage keys**: `arcade.stats.pacman` (kit stats; legacy `pacman.highScore` migrated/kept in sync by the kit), `arcade.session.pacman` (autosave, schema 1), `pacman.iconTheme` (`normal` | `fog`, default `normal`; Dental is never stored there, it comes from `arcade.dental`).
-- **Arcade status mapping**: `idle`→idle, `running`/`dying`/`levelClear`→running, `paused`→paused, `gameOver`→gameOver (only this ends a run; outcome always `over`, levels repeat forever).
-- **Target platform**: desktop browser; mobile/touch is out of scope for v1.
+- **Arcade status mapping**: `idle`→idle, `running`/`dying`/`levelClear`→running, `paused`→paused, `gameOver`→gameOver (only this ends a run; outcome `over`, or `finished` after the Finish button; levels repeat forever).
+- **Target platform**: desktop browser and phones (360–430 px portrait, touch).
 - **Communication**: respond to the user in **Hungarian** in chat, even though this file and the codebase are in English.
 
 If any fact above disagrees with the real repository, verify first and flag the divergence before editing code.

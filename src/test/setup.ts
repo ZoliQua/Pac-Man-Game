@@ -12,3 +12,18 @@ if (dom) {
 
 // Vitest runs without globals, so Testing Library cannot register its own cleanup.
 afterEach(() => cleanup());
+
+// jsdom has no PointerEvent: a MouseEvent subclass carries clientX/Y and pointerId for the swipe and
+// touch-pad tests (same polyfill as the kit's and the Solitaire repo's test setup).
+for (const win of [dom?.window, globalThis as unknown as Window & typeof globalThis].filter(Boolean) as (Window & typeof globalThis)[]) {
+  if (typeof win.PointerEvent === 'undefined') {
+    class PointerEventPolyfill extends win.MouseEvent {
+      readonly pointerId: number;
+      constructor(type: string, init: PointerEventInit = {}) {
+        super(type, init);
+        this.pointerId = init.pointerId ?? 1;
+      }
+    }
+    Object.defineProperty(win, 'PointerEvent', { configurable: true, writable: true, value: PointerEventPolyfill });
+  }
+}
